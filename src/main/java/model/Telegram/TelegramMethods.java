@@ -1,7 +1,11 @@
 package model.Telegram;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -19,11 +23,23 @@ import java.util.List;
 public class TelegramMethods {
 
     private static WeatherParser weatherParser = new Bot();
+    private static SendMessage sendMessage;
+    private static DeleteMessage deleteMessage;
 
-    public static void sendMsg(Message message, BotTelegram botTelegram, ArrayList<Boolean> flags) throws TelegramApiException {
-        SendMessage sendMessage = new SendMessage();
+    private static void messageOptions(Message message) {
+        sendMessage = new SendMessage();
         sendMessage.enableMarkdown(true);
         sendMessage.setChatId(message.getChatId().toString());
+    }
+
+    private static void deleteMessageOptions(Message message) {
+        deleteMessage = new DeleteMessage();
+        deleteMessage.setChatId(message.getChatId());
+        deleteMessage.setMessageId(message.getMessageId());
+    }
+
+    public static void sendMsg(Message message, BotTelegram botTelegram, ArrayList<Boolean> flags) throws TelegramApiException, MonthException {
+        messageOptions(message);
 
         //Исправить обработку выбора режима
         if (!flags.get(1)) {
@@ -44,13 +60,10 @@ public class TelegramMethods {
                         flags.set(1, true);
                         break;
                     case "Календарь":
-                        try {
-                            sendMessage.setText(LocalDate.now().getMonth().toString())
-                                    .setReplyMarkup(Calendar.createMonth(currentMonth));
-                            flags.set(2, true);
-                        } catch (MonthException e) {
-                            System.out.println(e.getMessage());
-                        }
+                        sendMessage.setText(LocalDate.now().getMonth().toString()
+                        + " " + LocalDate.now().getYear())
+                                .setReplyMarkup(Calendar.createMonth(currentMonth));
+                        flags.set(2, true);
                         break;
                     case "Тест3":
                         sendMessage.setText("Тест3");
@@ -62,6 +75,38 @@ public class TelegramMethods {
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void sendMsgFromCallBack(CallbackQuery callbackQuery, BotTelegram botTelegram) throws MonthException, TelegramApiException {
+        messageOptions(callbackQuery.getMessage());
+        deleteMessageOptions(callbackQuery.getMessage());
+
+        EditMessageText editMessageText = new EditMessageText();
+        editMessageText.setChatId(callbackQuery.getMessage().getChatId());
+        editMessageText.setMessageId(callbackQuery.getMessage().getMessageId());
+
+        String[] command = callbackQuery.getData().split("'");
+        int currentMonth = Integer.parseInt(command[1]);
+        if (command[0].equals("Previous")) {
+            int prevMonth = currentMonth - 1;
+            if (prevMonth < 1) {
+                prevMonth = 12;
+            }
+            editMessageText.setText(Month.of(prevMonth).toString()+ " " + LocalDate.now().getYear())
+                    .setReplyMarkup((InlineKeyboardMarkup) Calendar.createMonth(prevMonth));
+        } else if (command[0].equals("Next")) {
+            int nextMonth = currentMonth + 1;
+            if (nextMonth > 12) {
+                nextMonth = 1;
+            }
+            editMessageText.setText(Month.of(nextMonth).toString())
+                    .setReplyMarkup((InlineKeyboardMarkup) Calendar.createMonth(nextMonth));
+
+        }
+
+        botTelegram.execute(editMessageText);
+//        botTelegram.execute(deleteMessage);
+//        botTelegram.execute(sendMessage);
     }
 
     private static boolean check(ArrayList<Boolean> flags) {

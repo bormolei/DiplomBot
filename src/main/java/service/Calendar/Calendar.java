@@ -22,21 +22,22 @@ public class Calendar {
 
 
     public static ReplyKeyboard createMonth(int month) throws MonthException {
+        clearKeyBoard();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         switch (month) {
             case 1:
             case 3:
             case 5:
             case 7:
-            case 9:
-            case 11:
+            case 8:
+            case 10:
+            case 12:
                 createKeyBoard(31, rowList);
                 break;
             case 4:
             case 6:
-            case 8:
-            case 10:
-            case 12:
+            case 9:
+            case 11:
                 createKeyBoard(30, rowList);
                 break;
             case 2:
@@ -46,6 +47,10 @@ public class Calendar {
                 throw new MonthException("Данного(" + month + ") месяца не существует ", month);
 
         }
+        changeButtonsRow.add(new InlineKeyboardButton().setText("<")
+                .setCallbackData("Previous'" + month));
+        changeButtonsRow.add(new InlineKeyboardButton().setText(">")
+                .setCallbackData("Next'" + month));
         return inlineKeyboardMarkup;
     }
 
@@ -76,11 +81,6 @@ public class Calendar {
                         .setCallbackData(String.format("date %s", i + 1)));
             }
         }
-
-        changeButtonsRow.add(new InlineKeyboardButton().setText("<")
-                .setCallbackData("Previous"));
-        changeButtonsRow.add(new InlineKeyboardButton().setText(">")
-                .setCallbackData("Next"));
         rowList.add(keyboardButtonsRow1week);
         rowList.add(keyboardButtonsRow2week);
         rowList.add(keyboardButtonsRow3week);
@@ -88,5 +88,14 @@ public class Calendar {
         rowList.add(keyboardButtonsRow5week);
         rowList.add(changeButtonsRow);
         inlineKeyboardMarkup.setKeyboard(rowList);
+    }
+
+    private static void clearKeyBoard() {
+        keyboardButtonsRow1week.clear();
+        keyboardButtonsRow2week.clear();
+        keyboardButtonsRow3week.clear();
+        keyboardButtonsRow4week.clear();
+        keyboardButtonsRow5week.clear();
+        changeButtonsRow.clear();
     }
 }

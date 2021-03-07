@@ -5,12 +5,13 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import service.Exceptions.MonthException;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BotTelegram extends TelegramLongPollingBot {
-    static ArrayList<Boolean> flags = new ArrayList<>(); //1 - погода; 2 -тест2; 3-тест3
+    static ArrayList<Boolean> flags = new ArrayList<>(); //1 - погода; 2 - календарь; 3-тест3
     {
         flags.add(false);
         flags.add(false);
@@ -30,15 +31,13 @@ public class BotTelegram extends TelegramLongPollingBot {
         if (message != null && message.hasText()) {
             try {
                 TelegramMethods.sendMsg(message, this,flags);
-            } catch (TelegramApiException e) {
+            } catch (TelegramApiException | MonthException e) {
                 e.printStackTrace();
             }
         } else if(update.hasCallbackQuery()){
             try {
-                execute(new SendMessage().setText(
-                        update.getCallbackQuery().getData())
-                        .setChatId(update.getCallbackQuery().getMessage().getChatId()));
-            } catch (TelegramApiException e) {
+                TelegramMethods.sendMsgFromCallBack(update.getCallbackQuery(),this);
+            } catch (TelegramApiException | MonthException e) {
                 e.printStackTrace();
             }
         }
