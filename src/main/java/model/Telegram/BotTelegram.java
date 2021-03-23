@@ -11,12 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BotTelegram extends TelegramLongPollingBot {
-    static ArrayList<Boolean> flags = new ArrayList<>(); //1 - погода; 2 - календарь; 3-тест3
-    {
-        flags.add(false);
-        flags.add(false);
-        flags.add(false);
-    }
+
     static String botName;
     static String botToken;
 
@@ -30,13 +25,13 @@ public class BotTelegram extends TelegramLongPollingBot {
         Message message = update.getMessage();
         if (message != null && message.hasText()) {
             try {
-                TelegramMethods.sendMsg(message, this,flags);
+                TelegramMethods.sendMsg(message, this);
             } catch (TelegramApiException | MonthException e) {
                 e.printStackTrace();
             }
-        } else if(update.hasCallbackQuery()){
+        } else if (update.hasCallbackQuery()) {
             try {
-                TelegramMethods.sendMsgFromCallBack(update.getCallbackQuery(),this);
+                TelegramMethods.sendMsgFromCallBack(update.getCallbackQuery(), this);
             } catch (TelegramApiException | MonthException e) {
                 e.printStackTrace();
             }
