@@ -1,7 +1,6 @@
 package model.Telegram;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -15,8 +14,10 @@ import service.Calendar.Calendar;
 import service.Exceptions.MonthException;
 import service.WeatherParser;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class TelegramMethods {
 
     private static WeatherParser weatherParser = new Bot();
     private static SendMessage sendMessage;
-    private static DeleteMessage deleteMessage;
+    private static EditMessageText editMessageText;
 
     private static void messageOptions(Message message) {
         sendMessage = new SendMessage();
@@ -32,10 +33,10 @@ public class TelegramMethods {
         sendMessage.setChatId(message.getChatId().toString());
     }
 
-    private static void deleteMessageOptions(Message message) {
-        deleteMessage = new DeleteMessage();
-        deleteMessage.setChatId(message.getChatId());
-        deleteMessage.setMessageId(message.getMessageId());
+    private static void editMessageOptions(Message message) {
+        editMessageText = new EditMessageText();
+        editMessageText.setChatId(message.getChatId());
+        editMessageText.setMessageId(message.getMessageId());
     }
 
     public static void sendMsg(Message message, BotTelegram botTelegram, ArrayList<Boolean> flags) throws TelegramApiException, MonthException {
@@ -60,9 +61,8 @@ public class TelegramMethods {
                         flags.set(1, true);
                         break;
                     case "Календарь":
-                        sendMessage.setText(LocalDate.now().getMonth().toString()
-                        + " " + LocalDate.now().getYear())
-                                .setReplyMarkup(Calendar.createMonth(currentMonth));
+                        sendMessage.setText("Выберите число")
+                                .setReplyMarkup(Calendar.createMonth(currentMonth,LocalDate.now().getYear()));
                         flags.set(2, true);
                         break;
                     case "Тест3":
@@ -79,34 +79,10 @@ public class TelegramMethods {
 
     public static void sendMsgFromCallBack(CallbackQuery callbackQuery, BotTelegram botTelegram) throws MonthException, TelegramApiException {
         messageOptions(callbackQuery.getMessage());
-        deleteMessageOptions(callbackQuery.getMessage());
-
-        EditMessageText editMessageText = new EditMessageText();
-        editMessageText.setChatId(callbackQuery.getMessage().getChatId());
-        editMessageText.setMessageId(callbackQuery.getMessage().getMessageId());
-
-        String[] command = callbackQuery.getData().split("'");
-        int currentMonth = Integer.parseInt(command[1]);
-        if (command[0].equals("Previous")) {
-            int prevMonth = currentMonth - 1;
-            if (prevMonth < 1) {
-                prevMonth = 12;
-            }
-            editMessageText.setText(Month.of(prevMonth).toString()+ " " + LocalDate.now().getYear())
-                    .setReplyMarkup((InlineKeyboardMarkup) Calendar.createMonth(prevMonth));
-        } else if (command[0].equals("Next")) {
-            int nextMonth = currentMonth + 1;
-            if (nextMonth > 12) {
-                nextMonth = 1;
-            }
-            editMessageText.setText(Month.of(nextMonth).toString())
-                    .setReplyMarkup((InlineKeyboardMarkup) Calendar.createMonth(nextMonth));
-
-        }
-
+        editMessageOptions(callbackQuery.getMessage());
+        editMessageText.setText("Выберите месяц")
+                    .setReplyMarkup(chooseAnswer(callbackQuery));
         botTelegram.execute(editMessageText);
-//        botTelegram.execute(deleteMessage);
-//        botTelegram.execute(sendMessage);
     }
 
     private static boolean check(ArrayList<Boolean> flags) {
@@ -133,5 +109,28 @@ public class TelegramMethods {
 
         keyboardRows.add(keyboardFirstRow);
         replyKeyboardMarkup.setKeyboard(keyboardRows);
+    }
+
+    private static InlineKeyboardMarkup chooseAnswer(CallbackQuery callbackQuery) throws MonthException {
+        int date,month = 0,year = 0;
+        if(!callbackQuery.getData().split("'")[1].equals("")){
+            date = Integer.parseInt(callbackQuery.getData().split("'")[1]);
+        }
+        if(!callbackQuery.getData().split("'")[2].equals("")){
+            month = Integer.parseInt(callbackQuery.getData().split("'")[2]);
+        }
+        if(!callbackQuery.getData().split("'")[3].equals("")){
+            year = Integer.parseInt(callbackQuery.getData().split("'")[3]);
+        }
+//                Instant.ofEpochSecond(callbackQuery.getMessage().getDate()).atZone(ZoneId.of("Europe/Moscow")).getYear();
+        switch (callbackQuery.getData().split("'")[0]){
+            case "ChooseMonthButton":
+                return (InlineKeyboardMarkup) Calendar.createYear(year);
+            case "Month":
+                return (InlineKeyboardMarkup) Calendar.createMonth(month,year);
+            case "Date":
+                return null;
+        }
+        return null;
     }
 }
