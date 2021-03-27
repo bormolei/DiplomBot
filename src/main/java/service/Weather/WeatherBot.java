@@ -1,8 +1,9 @@
-package service;
+package service.Weather;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import service.Translate.Translator;
+import utils.WeatherUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,16 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class Bot implements WeatherParser {
+public class WeatherBot implements WeatherParser {
     private final static String API_CALL_TEMPLATE = "https://api.openweathermap.org/data/2.5/forecast?q=";
     private final static String API_KEY_TEMPLATE = "&units=metric&APPID=af2ed85eb4017a81d8584d861a45f21a";
     private final static String USER_AGENT = "Mozilla/5.0";
     private final static DateTimeFormatter INPUT_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final static DateTimeFormatter OUTPUT_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("MMM-dd HH:mm", Locale.US);
-
-
-    public Bot() {
-    }
 
     @Override
     public String getReadyForecast(String city) {
@@ -34,10 +31,10 @@ public class Bot implements WeatherParser {
             List<String> linesOfForecast = convertRawDataToList(jsonRawData);
             result = String.format("%s:%s%s", city, System.lineSeparator(), parseForecastDataFromList(linesOfForecast));
         } catch (IllegalArgumentException e) {
-            return String.format("Немогу найти город \"%s\". Попробуйте другой, например: \"Москва\" или \"Moscow\"", city);
+            return String.format("Данный город \"%s\" не найден. Или вам необходимо сменить режим", city);
         } catch (Exception e) {
             e.printStackTrace();
-            return "Серивис сейчас не работатет, пожалуйста попробуйте позже";
+            return "Сервис сейчас не работает, пожалуйста попробуйте позже";
         }
         return result;
     }
@@ -123,5 +120,9 @@ public class Bot implements WeatherParser {
         String weatherIconCode = WeatherUtils.weatherIconsCodes.get(formattedDescription);
 
         return String.format("%s   %s %s %s%s", formattedDateTime, formattedTemperature, formattedDescription, weatherIconCode, System.lineSeparator());
+    }
+
+    public void chooseCity() {
+
     }
 }
