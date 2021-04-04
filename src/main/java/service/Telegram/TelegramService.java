@@ -4,6 +4,7 @@ import Exceptions.Calendar.MonthException;
 import com.byteowls.jopencage.JOpenCageGeocoder;
 import com.byteowls.jopencage.model.JOpenCageResponse;
 import com.byteowls.jopencage.model.JOpenCageReverseRequest;
+import model.BotCalendarModel;
 import model.User;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
@@ -11,19 +12,29 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import service.Calendar.Calendar;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import service.Calendar.BotCalendar;
+import service.HibernateService.BotCalendarService;
 import service.HibernateService.UserService;
 import service.Weather.WeatherBot;
 import service.Weather.WeatherParser;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
 public class TelegramService {
+    protected static BotCalendarModel btm = new BotCalendarModel();
     protected static User user = new User();
     protected static WeatherParser weatherParser = new WeatherBot();
     protected static SendMessage sendMessage;
     protected static EditMessageText editMessageText;
     protected static ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
 
-    public static String checkMode(Long chatId){
+
+    public static String checkMode(Long chatId) {
         return UserService.getMode(chatId);
     }
 
@@ -39,9 +50,8 @@ public class TelegramService {
         editMessageText.setMessageId(message.getMessageId());
     }
 
-    protected static void changeModeForUser(String mode, Long chatId) {
-        user = UserService.getUser(chatId);
-        if(!(user.getMode() == null || user.getMode().equals(mode))){
+    protected static void changeModeForUser(String mode) {
+        if (!(user.getMode() == null || user.getMode().equals(mode))) {
             user.setMode(mode);
             UserService.updateUser(user);
         }
@@ -71,12 +81,45 @@ public class TelegramService {
         }
         switch (callbackQuery.getData().split("'")[0]) {
             case "ChooseMonthButton":
-                return (InlineKeyboardMarkup) Calendar.createYear(year);
+                return (InlineKeyboardMarkup) BotCalendar.createYear(year);
             case "Month":
-                return (InlineKeyboardMarkup) Calendar.createMonth(month, year);
-            case "Date":
-                return null;
+                return (InlineKeyboardMarkup) BotCalendar.createMonth(month, year);
         }
         return null;
+    }
+
+    protected static void setButtons(SendMessage sendMessage) {
+        sendMessage.setReplyMarkup(replyKeyboardMarkup);
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(false);
+
+        List<KeyboardRow> keyboardRows = new ArrayList<>();
+        KeyboardRow keyboardFirstRow = new KeyboardRow();
+
+        keyboardFirstRow.add(new KeyboardButton("Погода"));
+        keyboardFirstRow.add(new KeyboardButton("Календарь"));
+
+        keyboardRows.add(keyboardFirstRow);
+        replyKeyboardMarkup.setKeyboard(keyboardRows);
+    }
+
+    protected static void setGeoLocationButton(SendMessage sendMessage) {
+        sendMessage.setReplyMarkup(replyKeyboardMarkup);
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(false);
+
+        List<KeyboardRow> keyboardRows = new ArrayList<>();
+        KeyboardRow keyboardFirstRow = new KeyboardRow();
+
+        keyboardFirstRow.add(new KeyboardButton("Отправить свою локацию").setRequestLocation(true));
+
+        keyboardRows.add(keyboardFirstRow);
+        replyKeyboardMarkup.setKeyboard(keyboardRows);
+    }
+
+    protected static void showTasksForDay() {
+//        BotCalendarService.
     }
 }

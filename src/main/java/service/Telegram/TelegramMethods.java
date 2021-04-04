@@ -1,36 +1,34 @@
-package Telegram;
+package service.Telegram;
 
 import Exceptions.Calendar.MonthException;
-import com.byteowls.jopencage.JOpenCageGeocoder;
-import com.byteowls.jopencage.model.JOpenCageResponse;
-import com.byteowls.jopencage.model.JOpenCageReverseRequest;
-import model.User;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import Telegram.BotTelegram;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import service.Calendar.Calendar;
+import service.Calendar.BotCalendar;
+import service.Calendar.BotCalendarDateConverter;
+import service.HibernateService.BotCalendarService;
 import service.HibernateService.UserService;
-import service.Telegram.TelegramService;
 import utils.Commands;
 
+import java.text.ParseException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 public class TelegramMethods extends TelegramService {
 
     public static void sendMsg(Message message, BotTelegram botTelegram) throws TelegramApiException {
-//        user = UserService.getUser(message.getChatId());
-        messageOptions(message);
-        if (!UserService.checkChatIdUser(message.getChatId())) {
+        btm.clearFields();
+        user.clearFields();
+        try {
+            user = UserService.getUser(message.getChatId());
+        } catch (IndexOutOfBoundsException e) {
             user.setUserName(message.getChat().getFirstName() + " " + message.getChat().getLastName());
             user.setChatId(message.getChatId());
+            user.setMode("");
             UserService.addUser(user);
         }
+        messageOptions(message);
         writeMsg(message, botTelegram);
 
     }
@@ -43,9 +41,14 @@ public class TelegramMethods extends TelegramService {
             } else if (Commands.fromString(message.getText()).isPresent()) {
                 chosenCommand(message);
             } else {
-                switch (checkMode(message.getChatId())) {
+                switch (user.getMode()) {
                     case "WEATHER":
                         sendMessage.setText(weatherParser.getReadyForecast(message.getText()));
+                        break;
+                    case "CALENDAR":
+//                        calendar.setTimeInMillis(message.getDate().longValue()*1000);
+//                        sendMessage.setText(sdf.format(calendar.getTime()));
+                        message.getText();
                         break;
                     default:
                         sendMessage.setText("Выберите режим");
@@ -60,19 +63,18 @@ public class TelegramMethods extends TelegramService {
     }
 
 
-
     private static void chosenCommand(Message message) throws MonthException {
         int currentMonth = LocalDate.now().getMonth().getValue();
         switch (message.getText()) {
             case "Погода":
-                changeModeForUser(Commands.WEATHER.toString(), message.getChatId());
+                changeModeForUser(Commands.WEATHER.toString());
                 setGeoLocationButton(sendMessage);
                 sendMessage.setText("Введите название города.Например: \"Москва\" или \"Moscow\"");
                 break;
             case "Календарь":
-                changeModeForUser(Commands.CALENDAR.toString(), message.getChatId());
+                changeModeForUser(Commands.CALENDAR.toString());
                 sendMessage.setText("Выберите число")
-                        .setReplyMarkup(Calendar.createMonth(currentMonth, LocalDate.now().getYear()));
+                        .setReplyMarkup(BotCalendar.createMonth(currentMonth, LocalDate.now().getYear()));
                 break;
             case "Тест3":
                 sendMessage.setText("Тест3");
@@ -83,39 +85,27 @@ public class TelegramMethods extends TelegramService {
     public static void sendMsgFromCallBack(CallbackQuery callbackQuery, BotTelegram botTelegram) throws TelegramApiException, MonthException {
         messageOptions(callbackQuery.getMessage());
         editMessageOptions(callbackQuery.getMessage());
-        editMessageText.setText("Выберите месяц")
-                .setReplyMarkup(chooseAnswer(callbackQuery));
+        if (callbackQuery.getData().split("'")[0].equals("date")) {
+            int date = Integer.parseInt(callbackQuery.getData().split("'")[1]);
+            int month = Integer.parseInt(callbackQuery.getData().split("'")[2]);
+            int year = Integer.parseInt(callbackQuery.getData().split("'")[3]);
+            editMessageText.setText(String.format("Запланированные дела на %s-%s-%s\n", date,month,year))
+                    .setReplyMarkup((InlineKeyboardMarkup) BotCalendar.taskList(date,month,year));
+        } else if(callbackQuery.getData().split("'")[0].equals("add")) {
+            try {
+                btm.setDate(BotCalendarDateConverter.fromStringToDate(callbackQuery.getData().split("'")[1]));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+//            BotCalendarService.addMark(btm);
+            editMessageText.setText("Введите заметку" +
+                    "\nобразец \"13:24-Помыть посуду, позвонить, ....\"");
+        } else {
+            editMessageText.setText("Выберите месяц")
+                    .setReplyMarkup(chooseAnswer(callbackQuery));
+        }
         botTelegram.execute(editMessageText);
     }
 
-    private static void setButtons(SendMessage sendMessage) {
-        sendMessage.setReplyMarkup(replyKeyboardMarkup);
-        replyKeyboardMarkup.setSelective(true);
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setOneTimeKeyboard(false);
 
-        List<KeyboardRow> keyboardRows = new ArrayList<>();
-        KeyboardRow keyboardFirstRow = new KeyboardRow();
-
-        keyboardFirstRow.add(new KeyboardButton("Погода"));
-        keyboardFirstRow.add(new KeyboardButton("Календарь"));
-
-        keyboardRows.add(keyboardFirstRow);
-        replyKeyboardMarkup.setKeyboard(keyboardRows);
-    }
-
-    private static void setGeoLocationButton(SendMessage sendMessage) {
-        sendMessage.setReplyMarkup(replyKeyboardMarkup);
-        replyKeyboardMarkup.setSelective(true);
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setOneTimeKeyboard(false);
-
-        List<KeyboardRow> keyboardRows = new ArrayList<>();
-        KeyboardRow keyboardFirstRow = new KeyboardRow();
-
-        keyboardFirstRow.add(new KeyboardButton("Отправить свою локацию").setRequestLocation(true));
-
-        keyboardRows.add(keyboardFirstRow);
-        replyKeyboardMarkup.setKeyboard(keyboardRows);
-    }
 }

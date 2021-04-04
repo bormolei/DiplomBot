@@ -11,7 +11,7 @@ import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CalendarService {
+public class BotCalendarMethods {
     static List<InlineKeyboardButton> keyboardButtonsMonthYear = new ArrayList<>();
     static List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
     static List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
@@ -21,6 +21,17 @@ public class CalendarService {
     static List<InlineKeyboardButton> changeButtonsRow = new ArrayList<>();
     static InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
     static InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+
+    protected static void clearKeyBoard() {
+        keyboardButtonsMonthYear.clear();
+        keyboardButtonsRow1.clear();
+        keyboardButtonsRow2.clear();
+        keyboardButtonsRow3.clear();
+        keyboardButtonsRow4.clear();
+        keyboardButtonsRow5.clear();
+        changeButtonsRow.clear();
+    }
+
     /**
      * Создание клавиатуры для года
      *
@@ -37,15 +48,15 @@ public class CalendarService {
             }
             if (i > 3 && i <= 6) {
                 keyboardButtonsRow2.add(new InlineKeyboardButton().setText(Month.of(i).toString())
-                        .setCallbackData("Month''" + (Month.of(i).getValue())+ "'" + year));
+                        .setCallbackData("Month''" + (Month.of(i).getValue()) + "'" + year));
             }
             if (i > 6 && i <= 9) {
                 keyboardButtonsRow3.add(new InlineKeyboardButton().setText(Month.of(i).toString())
-                        .setCallbackData("Month''" + (Month.of(i).getValue())+ "'" + year));
+                        .setCallbackData("Month''" + (Month.of(i).getValue()) + "'" + year));
             }
             if (i > 9) {
                 keyboardButtonsRow4.add(new InlineKeyboardButton().setText(Month.of(i).toString())
-                        .setCallbackData("Month''" + (Month.of(i).getValue())+ "'" + year));
+                        .setCallbackData("Month''" + (Month.of(i).getValue()) + "'" + year));
             }
         }
         rowList.add(keyboardButtonsRow1);
@@ -56,23 +67,23 @@ public class CalendarService {
         return inlineKeyboardMarkup;
     }
 
-    protected static void createDaysKeyBoard(int maxDateOfMonth, List<List<InlineKeyboardButton>> rowList) {
+    protected static void createDaysKeyBoard(int maxDateOfMonth, int month, int year, List<List<InlineKeyboardButton>> rowList) {
         for (int i = 0; i < maxDateOfMonth; i++) {
             if (i <= 6) {
                 keyboardButtonsRow1.add(new InlineKeyboardButton().setText(String.valueOf(i + 1))
-                        .setCallbackData(String.format("date'%s", i + 1)));
+                        .setCallbackData(String.format("date'%s'%s'%s", i + 1, month, year)));
             } else if (i <= 13) {
                 keyboardButtonsRow2.add(new InlineKeyboardButton().setText(String.valueOf(i + 1))
-                        .setCallbackData(String.format("date'%s", i + 1)));
+                        .setCallbackData(String.format("date'%s'%s'%s", i + 1, month, year)));
             } else if (i <= 20) {
                 keyboardButtonsRow3.add(new InlineKeyboardButton().setText(String.valueOf(i + 1))
-                        .setCallbackData(String.format("date'%s", i + 1)));
+                        .setCallbackData(String.format("date'%s'%s'%s", i + 1, month, year)));
             } else if (i <= 27) {
                 keyboardButtonsRow4.add(new InlineKeyboardButton().setText(String.valueOf(i + 1))
-                        .setCallbackData(String.format("date'%s", i + 1)));
+                        .setCallbackData(String.format("date'%s'%s'%s", i + 1, month, year)));
             } else if (i <= 30) {
                 keyboardButtonsRow5.add(new InlineKeyboardButton().setText(String.valueOf(i + 1))
-                        .setCallbackData(String.format("date'%s", i + 1)));
+                        .setCallbackData(String.format("date'%s'%s'%s", i + 1, month, year)));
             }
         }
         rowList.add(keyboardButtonsMonthYear);
@@ -113,16 +124,16 @@ public class CalendarService {
             case 8:
             case 10:
             case 12:
-                CalendarService.createDaysKeyBoard(31, rowList);
+                BotCalendarMethods.createDaysKeyBoard(31, month, year, rowList);
                 break;
             case 4:
             case 6:
             case 9:
             case 11:
-                CalendarService.createDaysKeyBoard(30, rowList);
+                BotCalendarMethods.createDaysKeyBoard(30, month, year, rowList);
                 break;
             case 2:
-                february(rowList);
+                february(month, year, rowList);
                 break;
             default:
                 throw new MonthException("Данного(" + month + ") месяца не существует ", month);
@@ -131,21 +142,24 @@ public class CalendarService {
         return inlineKeyboardMarkup;
     }
 
-    private static void february(List<List<InlineKeyboardButton>> rowList) {
+    private static void february(int month, int year, List<List<InlineKeyboardButton>> rowList) {
         if (!Year.isLeap(LocalDate.now().getYear())) {
-            CalendarService.createDaysKeyBoard(28, rowList);
+            BotCalendarMethods.createDaysKeyBoard(28, month, year, rowList);
         } else {
-            CalendarService.createDaysKeyBoard(29, rowList);
+            BotCalendarMethods.createDaysKeyBoard(29, month, year, rowList);
         }
     }
 
-    protected static void clearKeyBoard() {
-        keyboardButtonsMonthYear.clear();
-        keyboardButtonsRow1.clear();
-        keyboardButtonsRow2.clear();
-        keyboardButtonsRow3.clear();
-        keyboardButtonsRow4.clear();
-        keyboardButtonsRow5.clear();
-        changeButtonsRow.clear();
+    protected static ReplyKeyboard createKeyBoardForDay(int date, int month, int year, List<List<InlineKeyboardButton>> rowList) {
+        keyboardButtonsRow1.add(new InlineKeyboardButton().setText("Добавить заметку")
+                .setCallbackData(String.format("add'%s-%s-%s", date, month, year)));
+        keyboardButtonsRow1.add(new InlineKeyboardButton().setText("Назад")
+                .setCallbackData("Month''" + month + "'" + year));
+        rowList.add(keyboardButtonsRow1);
+        inlineKeyboardMarkup.setKeyboard(rowList);
+        return inlineKeyboardMarkup;
     }
+
+
+
 }

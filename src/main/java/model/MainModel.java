@@ -1,5 +1,5 @@
 package model;
 
-public class MainModel {
-
+public abstract class MainModel {
+    public abstract void clearFields();
 }
