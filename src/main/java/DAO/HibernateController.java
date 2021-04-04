@@ -1,6 +1,7 @@
 package DAO;
 
 import model.MainModel;
+import model.User;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import utils.Actions;
@@ -53,13 +54,13 @@ public class HibernateController {
         }
     }
 
-    public static MainModel getRowByField(MainModel mainModel, String fieldName, Long condition){
+    public static List<? extends MainModel> getRowsByField(MainModel mainModel, String fieldName, Long condition){
         try(Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
             CriteriaBuilder builder = session.getCriteriaBuilder();
             CriteriaQuery<? extends MainModel> criteria = builder.createQuery(mainModel.getClass());
             Root root = criteria.from(mainModel.getClass());
             criteria.select(root).where(builder.equal(root.get(fieldName),condition));
-            return session.createQuery(criteria).getSingleResult();
+            return session.createQuery(criteria).getResultList();
         }
     }
 }

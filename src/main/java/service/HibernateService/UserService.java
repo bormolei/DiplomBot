@@ -23,11 +23,11 @@ public class UserService {
     }
 
     public static User getUser(Long chatId){
-        return (User) HibernateController.getRowByField(new User(),"chatId",chatId);
+        return (User) HibernateController.getRowsByField(new User(),"chatId",chatId).get(0);
     }
 
     public static String getMode(Long chatId){
-        User user = (User) HibernateController.getRowByField(new User(),"chatId",chatId);
+        User user = (User) HibernateController.getRowsByField(new User(),"chatId",chatId).get(0);
         return user.getMode();
     }
 }

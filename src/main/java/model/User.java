@@ -4,7 +4,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "users")
-public class User extends MainModel  {
+public class User extends MainModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -46,5 +46,10 @@ public class User extends MainModel  {
         this.mode = mode;
     }
 
-
+    public void clearFields() {
+        id = null;
+        userName = null;
+        chatId = null;
+        mode = null;
+    }
 }
