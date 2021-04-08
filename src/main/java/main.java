@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.generics.BotSession;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -37,32 +38,11 @@ public class main {
 
     //2021-03-27 11:56:13.445000
     private static void test() throws ParseException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/M/yyyy");
 
-//        List l = BotCalendarService.getAllTasksForDayForUser(100003L);
-//        List l2 = new ArrayList();
-//        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-//        for (int i = 0; i < l.size(); i++) {
-//            ((BotCalendar) l.get(0)).getDate();
-//            l2.add(new Timestamp(format.parse(((BotCalendar) l.get(0)).getDate().toString()).getTime()));
-//        }
-//        System.out.println();
-        String datestr = "2021-03-27 11:56";
-        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm");
-        Timestamp ts = new Timestamp(format.parse(datestr).getTime());
-//        Instant instant = ts.toInstant();
+        String date = "20/4/2021";
 
-//        BotCalendar calendar = new BotCalendar();
-//        calendar.setChatId(100003L);
-//        calendar.setDate(ts);
-//        calendar.setComment("test");
-//        HibernateController.doHibernateAction(calendar, Actions.SAVE);
-//
-        Long mills = (long) (1616934194L * 1000);
-        LocalDateTime date =  LocalDateTime.parse("2021-03-27 11:56", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-        ZoneId zoneId = ZoneId.of("Europe/Moscow");
-        Calendar calendar1 = Calendar.getInstance();
-        calendar1.setTimeInMillis(mills);
-        format.format(calendar1.getTime());
-        System.out.println();
+// конвертируем String в LocalDate
+        LocalDate localDate = LocalDate.parse(date, formatter);
     }
 }

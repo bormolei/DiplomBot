@@ -16,15 +16,12 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import service.Calendar.BotCalendar;
 import service.Calendar.BotCalendarDateConverter;
-import service.HibernateService.BotCalendarService;
 import service.HibernateService.UserService;
 import service.Weather.WeatherBot;
 import service.Weather.WeatherParser;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 public class TelegramService {
@@ -72,16 +69,16 @@ public class TelegramService {
 
     protected static InlineKeyboardMarkup chooseAnswer(CallbackQuery callbackQuery) throws MonthException {
         int date, month = 0, year = 0;
-        if (!callbackQuery.getData().split("'")[1].equals("")) {
-            date = Integer.parseInt(callbackQuery.getData().split("'")[1]);
-        }
         if (!callbackQuery.getData().split("'")[2].equals("")) {
-            month = Integer.parseInt(callbackQuery.getData().split("'")[2]);
+            date = Integer.parseInt(callbackQuery.getData().split("'")[2]);
         }
         if (!callbackQuery.getData().split("'")[3].equals("")) {
-            year = Integer.parseInt(callbackQuery.getData().split("'")[3]);
+            month = Integer.parseInt(callbackQuery.getData().split("'")[3]);
         }
-        switch (callbackQuery.getData().split("'")[0]) {
+        if (!callbackQuery.getData().split("'")[4].equals("")) {
+            year = Integer.parseInt(callbackQuery.getData().split("'")[4]);
+        }
+        switch (callbackQuery.getData().split("'")[1]) {
             case "ChooseMonthButton":
                 return (InlineKeyboardMarkup) BotCalendar.createYear(year);
             case "Month":
@@ -115,7 +112,8 @@ public class TelegramService {
         List<KeyboardRow> keyboardRows = new ArrayList<>();
         KeyboardRow keyboardFirstRow = new KeyboardRow();
 
-        keyboardFirstRow.add(new KeyboardButton("Отправить свою локацию").setRequestLocation(true));
+        keyboardFirstRow.add(new KeyboardButton("Отправить свое местоположение").setRequestLocation(true));
+        keyboardFirstRow.add(backToMain());
 
         keyboardRows.add(keyboardFirstRow);
         replyKeyboardMarkup.setKeyboard(keyboardRows);
@@ -125,16 +123,20 @@ public class TelegramService {
 //        BotCalendarService.
     }
 
+    private static KeyboardButton backToMain(){
+        return new KeyboardButton("На главную");
+    }
+
     protected static void calendarCallBack(CallbackQuery callbackQuery) throws MonthException {
-        if (callbackQuery.getData().split("'")[0].equals("date")) {
-            int date = Integer.parseInt(callbackQuery.getData().split("'")[1]);
-            int month = Integer.parseInt(callbackQuery.getData().split("'")[2]);
-            int year = Integer.parseInt(callbackQuery.getData().split("'")[3]);
+        if (callbackQuery.getData().split("'")[1].equals("date")) {
+            int date = Integer.parseInt(callbackQuery.getData().split("'")[2]);
+            int month = Integer.parseInt(callbackQuery.getData().split("'")[3]);
+            int year = Integer.parseInt(callbackQuery.getData().split("'")[4]);
             editMessageText.setText(String.format("Запланированные дела на %s-%s-%s\n", date,month,year))
                     .setReplyMarkup((InlineKeyboardMarkup) BotCalendar.taskList(date,month,year));
-        } else if(callbackQuery.getData().split("'")[0].equals("add")) {
+        } else if(callbackQuery.getData().split("'")[1].equals("add")) {
             try {
-                btm.setDate(BotCalendarDateConverter.fromStringToDate(callbackQuery.getData().split("'")[1]));
+                btm.setDate(BotCalendarDateConverter.fromStringToDate(callbackQuery.getData().split("'")[2]));
             } catch (ParseException e) {
                 e.printStackTrace();
             }
