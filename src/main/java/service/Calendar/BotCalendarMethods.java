@@ -4,6 +4,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import Exceptions.Calendar.MonthException;
+import service.Telegram.TelegramKeyboard;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -11,26 +12,7 @@ import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BotCalendarMethods {
-    static List<InlineKeyboardButton> keyboardButtonsMonthYear = new ArrayList<>();
-    static List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
-    static List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
-    static List<InlineKeyboardButton> keyboardButtonsRow3 = new ArrayList<>();
-    static List<InlineKeyboardButton> keyboardButtonsRow4 = new ArrayList<>();
-    static List<InlineKeyboardButton> keyboardButtonsRow5 = new ArrayList<>();
-    static List<InlineKeyboardButton> changeButtonsRow = new ArrayList<>();
-    static InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-    static InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-
-    protected static void clearKeyBoard() {
-        keyboardButtonsMonthYear.clear();
-        keyboardButtonsRow1.clear();
-        keyboardButtonsRow2.clear();
-        keyboardButtonsRow3.clear();
-        keyboardButtonsRow4.clear();
-        keyboardButtonsRow5.clear();
-        changeButtonsRow.clear();
-    }
+public class BotCalendarMethods extends TelegramKeyboard {
 
     /**
      * Создание клавиатуры для года

@@ -4,15 +4,14 @@ import Exceptions.Calendar.MonthException;
 import Telegram.BotTelegram;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import service.Calendar.BotCalendar;
-import service.Calendar.BotCalendarDateConverter;
-import service.HibernateService.BotCalendarService;
 import service.HibernateService.UserService;
+import service.Weather.WeatherBot;
+import service.Weather.WeatherMethods;
 import utils.Commands;
 
-import java.text.ParseException;
 import java.time.LocalDate;
 
 public class TelegramMethods extends TelegramService {
@@ -37,13 +36,20 @@ public class TelegramMethods extends TelegramService {
         try {
             setButtons(sendMessage);
             if (message.hasLocation()) {
-                sendMessage.setText(weatherParser.getReadyForecast(parceGeo(message)));
+                sendMessage.setText(weatherParser.getReadyForecast(parceGeo(message), 1))
+                        .setReplyMarkup(WeatherBot.createHours(1));
             } else if (Commands.fromString(message.getText()).isPresent()) {
                 chosenCommand(message);
             } else {
                 switch (user.getMode()) {
                     case "WEATHER":
-                        sendMessage.setText(weatherParser.getReadyForecast(message.getText()));
+                        String weatherAnswer = weatherParser.getReadyForecast(message.getText(), 1);
+                        if (weatherAnswer.contains("Сервис") || weatherAnswer.contains("режим")) {
+                            sendMessage.setText(weatherAnswer);
+                        } else {
+                            sendMessage.setText(weatherAnswer)
+                                    .setReplyMarkup(WeatherBot.createHours(1));
+                        }
                         break;
                     case "CALENDAR":
 //                        calendar.setTimeInMillis(message.getDate().longValue()*1000);
@@ -86,25 +92,17 @@ public class TelegramMethods extends TelegramService {
         messageOptions(callbackQuery.getMessage());
         editMessageOptions(callbackQuery.getMessage());
         if (callbackQuery.getData().split("'")[0].equals("date")) {
-            int date = Integer.parseInt(callbackQuery.getData().split("'")[1]);
-            int month = Integer.parseInt(callbackQuery.getData().split("'")[2]);
-            int year = Integer.parseInt(callbackQuery.getData().split("'")[3]);
-            editMessageText.setText(String.format("Запланированные дела на %s-%s-%s\n", date,month,year))
-                    .setReplyMarkup((InlineKeyboardMarkup) BotCalendar.taskList(date,month,year));
-        } else if(callbackQuery.getData().split("'")[0].equals("add")) {
-            try {
-                btm.setDate(BotCalendarDateConverter.fromStringToDate(callbackQuery.getData().split("'")[1]));
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-//            BotCalendarService.addMark(btm);
-            editMessageText.setText("Введите заметку" +
-                    "\nобразец \"13:24-Помыть посуду, позвонить, ....\"");
-        } else {
-            editMessageText.setText("Выберите месяц")
-                    .setReplyMarkup(chooseAnswer(callbackQuery));
+            calendarCallBack(callbackQuery);
+        } else if (callbackQuery.getData().split("'")[0].equals("day")) {
+            weatherCallBack(callbackQuery);
         }
-        botTelegram.execute(editMessageText);
+        try {
+            if (!callbackQuery.getData().split("'")[0].equals(" ")) {
+                botTelegram.execute(editMessageText);
+            }
+        } catch (TelegramApiRequestException e) {
+            e.printStackTrace();
+        }
     }
 
 
