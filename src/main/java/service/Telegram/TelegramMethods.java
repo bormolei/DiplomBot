@@ -54,6 +54,7 @@ public class TelegramMethods extends TelegramService {
                     case "CALENDAR":
 //                        calendar.setTimeInMillis(message.getDate().longValue()*1000);
 //                        sendMessage.setText(sdf.format(calendar.getTime()));
+                        sendMessage.setText("Ошибка ввода");
                         message.getText();
                         break;
                     case "Main":
@@ -92,13 +93,21 @@ public class TelegramMethods extends TelegramService {
     public static void sendMsgFromCallBack(CallbackQuery callbackQuery, BotTelegram botTelegram) throws TelegramApiException, MonthException {
         messageOptions(callbackQuery.getMessage());
         editMessageOptions(callbackQuery.getMessage());
-        if (callbackQuery.getData().split("'")[0].equals("Calendar")) {
-            calendarCallBack(callbackQuery);
-        } else if (callbackQuery.getData().split("'")[0].equals("day")) {
-            weatherCallBack(callbackQuery);
+        switch (callbackQuery.getData().split("'")[0]){
+            case "Calendar":
+                calendarCallBack(callbackQuery);
+                break;
+            case "day":
+                weatherCallBack(callbackQuery);
+                break;
+            case "MainMenu":
+                changeModeForUser(Commands.Main.toString());
+                bactToMainMenu(callbackQuery);
+                botTelegram.execute(sendMessage);
+                break;
         }
         try {
-            if (!callbackQuery.getData().split("'")[0].equals(" ")) {
+            if (!callbackQuery.getData().split("'")[0].equals(" ") && editMessageText.getText() != null) {
                 botTelegram.execute(editMessageText);
             }
         } catch (TelegramApiRequestException e) {

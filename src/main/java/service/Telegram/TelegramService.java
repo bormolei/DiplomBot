@@ -113,7 +113,6 @@ public class TelegramService {
         KeyboardRow keyboardFirstRow = new KeyboardRow();
 
         keyboardFirstRow.add(new KeyboardButton("Отправить свое местоположение").setRequestLocation(true));
-        keyboardFirstRow.add(backToMain());
 
         keyboardRows.add(keyboardFirstRow);
         replyKeyboardMarkup.setKeyboard(keyboardRows);
@@ -123,7 +122,7 @@ public class TelegramService {
 //        BotCalendarService.
     }
 
-    private static KeyboardButton backToMain(){
+    private static KeyboardButton backToMain() {
         return new KeyboardButton("На главную");
     }
 
@@ -132,9 +131,9 @@ public class TelegramService {
             int date = Integer.parseInt(callbackQuery.getData().split("'")[2]);
             int month = Integer.parseInt(callbackQuery.getData().split("'")[3]);
             int year = Integer.parseInt(callbackQuery.getData().split("'")[4]);
-            editMessageText.setText(String.format("Запланированные дела на %s-%s-%s\n", date,month,year))
-                    .setReplyMarkup((InlineKeyboardMarkup) BotCalendar.taskList(date,month,year));
-        } else if(callbackQuery.getData().split("'")[1].equals("add")) {
+            editMessageText.setText(String.format("Запланированные дела на %s-%s-%s\n", date, month, year))
+                    .setReplyMarkup((InlineKeyboardMarkup) BotCalendar.taskList(date, month, year));
+        } else if (callbackQuery.getData().split("'")[1].equals("add")) {
             try {
                 btm.setDate(BotCalendarDateConverter.fromStringToDate(callbackQuery.getData().split("'")[2]));
             } catch (ParseException e) {
@@ -150,12 +149,17 @@ public class TelegramService {
     }
 
     protected static void weatherCallBack(CallbackQuery callbackQuery) throws MonthException {
-        if (callbackQuery.getData().split("'")[0].equals("day")){
+        if (callbackQuery.getData().split("'")[0].equals("day")) {
             String city = callbackQuery.getMessage().getText().split(":")[0];
             int days = Integer.parseInt(callbackQuery.getData().split("'")[1]);
-            editMessageText.setText(weatherParser.getReadyForecast(city,days))
+            editMessageText.setText(weatherParser.getReadyForecast(city, days))
                     .setReplyMarkup((InlineKeyboardMarkup) WeatherBot.createHours(days));
 
         }
+    }
+
+    protected static void bactToMainMenu(CallbackQuery callbackQuery) {
+        setButtons(sendMessage);
+        sendMessage.setText("Выберите режим");
     }
 }
