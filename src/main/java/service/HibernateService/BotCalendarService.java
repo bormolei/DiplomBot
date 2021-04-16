@@ -9,10 +9,10 @@ import java.util.List;
 
 public class BotCalendarService {
     public static void addTask(BotCalendarModel botCalendarModel){
-        HibernateController.doHibernateAction(botCalendarModel, Actions.SAVE);
+        HibernateController.doHibernateAction(botCalendarModel, Actions.UPDATE);
     }
 
-    public static List<? extends MainModel> getAllTasksForDayForUser(Long chatId){
+    public static List<? extends MainModel> getAllUserTasksForDay(Long chatId){
        return HibernateController.getRowsByField(new BotCalendarModel(),"chatId", chatId);
     }
 
@@ -21,7 +21,7 @@ public class BotCalendarService {
 
     }
 
-    public static void addMark(BotCalendarModel botCalendarModel){
-
+    public static void addPrecondition(BotCalendarModel botCalendarModel){
+        HibernateController.doHibernateAction(botCalendarModel,Actions.SAVE);
     }
 }

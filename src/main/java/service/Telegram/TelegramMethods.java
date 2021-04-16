@@ -7,17 +7,22 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import service.Calendar.BotCalendar;
+import service.Calendar.BotCalendarDateConverter;
+import service.Calendar.BotCalendarMethods;
+import service.HibernateService.BotCalendarService;
 import service.HibernateService.UserService;
 import service.Weather.WeatherBot;
-import service.Weather.WeatherMethods;
 import utils.Commands;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.Arrays;
+import java.util.List;
 
 public class TelegramMethods extends TelegramService {
 
     public static void sendMsg(Message message, BotTelegram botTelegram) throws TelegramApiException {
-        btm.clearFields();
+        bcm.clearFields();
         user.clearFields();
         try {
             user = UserService.getUser(message.getChatId());
@@ -52,10 +57,22 @@ public class TelegramMethods extends TelegramService {
                         }
                         break;
                     case "CALENDAR":
-//                        calendar.setTimeInMillis(message.getDate().longValue()*1000);
-//                        sendMessage.setText(sdf.format(calendar.getTime()));
-                        sendMessage.setText("Ошибка ввода");
-                        message.getText();
+                        bcm = BotCalendarMethods.readyForTask(message.getChatId());
+                        if (bcm != null) {
+                            List<String> userMessage = Arrays.asList(message.getText().split("-"));
+                            try {
+                                bcm.setTime(BotCalendarDateConverter.parceTime(userMessage.get(0)));
+                                bcm.setTask(userMessage.get(1));
+                                BotCalendarService.addTask(bcm);
+                                sendMessage.setText("Ваша заметка на " + bcm.getDate()
+                                        + " " + bcm.getTime()
+                                        + " добавлена");
+                            } catch (DateTimeParseException e) {
+                                sendMessage.setText("Неверно введено время, образец для времени \"11:12\"");
+                            } catch (ArrayIndexOutOfBoundsException e) {
+                                sendMessage.setText("Необходимо ввести текст для заметки");
+                            }
+                        }
                         break;
                     case "Main":
                         sendMessage.setText("Выберите режим");
@@ -76,7 +93,7 @@ public class TelegramMethods extends TelegramService {
             case "Погода":
                 changeModeForUser(Commands.WEATHER.toString());
                 setGeoLocationButton(sendMessage);
-                sendMessage.setText("Введите название города.Например: \"Москва\" или \"Moscow\"");
+                sendMessage.setText("Введите название города.\nНапример: \"Москва\" или \"Moscow\"");
                 break;
             case "Календарь":
                 changeModeForUser(Commands.CALENDAR.toString());
@@ -93,7 +110,7 @@ public class TelegramMethods extends TelegramService {
     public static void sendMsgFromCallBack(CallbackQuery callbackQuery, BotTelegram botTelegram) throws TelegramApiException, MonthException {
         messageOptions(callbackQuery.getMessage());
         editMessageOptions(callbackQuery.getMessage());
-        switch (callbackQuery.getData().split("'")[0]){
+        switch (callbackQuery.getData().split("'")[0]) {
             case "Calendar":
                 calendarCallBack(callbackQuery);
                 break;
@@ -102,7 +119,7 @@ public class TelegramMethods extends TelegramService {
                 break;
             case "MainMenu":
                 changeModeForUser(Commands.Main.toString());
-                bactToMainMenu(callbackQuery);
+                backToMainMenu(callbackQuery);
                 botTelegram.execute(sendMessage);
                 break;
         }

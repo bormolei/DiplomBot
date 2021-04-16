@@ -16,6 +16,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import service.Calendar.BotCalendar;
 import service.Calendar.BotCalendarDateConverter;
+import service.HibernateService.BotCalendarService;
 import service.HibernateService.UserService;
 import service.Weather.WeatherBot;
 import service.Weather.WeatherParser;
@@ -25,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TelegramService {
-    protected static BotCalendarModel btm = new BotCalendarModel();
+    protected static BotCalendarModel bcm = new BotCalendarModel();
     protected static User user = new User();
     protected static WeatherParser weatherParser = new WeatherBot();
     protected static SendMessage sendMessage;
@@ -113,6 +114,7 @@ public class TelegramService {
         KeyboardRow keyboardFirstRow = new KeyboardRow();
 
         keyboardFirstRow.add(new KeyboardButton("Отправить свое местоположение").setRequestLocation(true));
+        keyboardFirstRow.add(new KeyboardButton("На главную"));
 
         keyboardRows.add(keyboardFirstRow);
         replyKeyboardMarkup.setKeyboard(keyboardRows);
@@ -135,13 +137,15 @@ public class TelegramService {
                     .setReplyMarkup((InlineKeyboardMarkup) BotCalendar.taskList(date, month, year));
         } else if (callbackQuery.getData().split("'")[1].equals("add")) {
             try {
-                btm.setDate(BotCalendarDateConverter.fromStringToDate(callbackQuery.getData().split("'")[2]));
+                bcm.setChatId(callbackQuery.getMessage().getChatId());
+                bcm.setDate(BotCalendarDateConverter.fromStringToDate(callbackQuery.getData().split("'")[2]));
+                bcm.setAddUpdFlag(true);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-//            BotCalendarService.addMark(btm);
-            editMessageText.setText("Введите заметку" +
-                    "\nобразец \"13:24-Помыть посуду, позвонить, ....\"");
+            BotCalendarService.addPrecondition(bcm);
+            editMessageText.setText("Укажите время для вашей заметки и текст заметки" +
+                    "\nобразец \"11:12\"-Прогулка");
         } else {
             editMessageText.setText("Выберите месяц")
                     .setReplyMarkup(chooseAnswer(callbackQuery));
@@ -158,7 +162,7 @@ public class TelegramService {
         }
     }
 
-    protected static void bactToMainMenu(CallbackQuery callbackQuery) {
+    protected static void backToMainMenu(CallbackQuery callbackQuery) {
         setButtons(sendMessage);
         sendMessage.setText("Выберите режим");
     }

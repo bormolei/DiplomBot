@@ -1,18 +1,15 @@
 import Telegram.BotTelegram;
+import model.BotCalendarModel;
+import model.MainModel;
 import org.apache.log4j.PropertyConfigurator;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.meta.generics.BotSession;
+import service.HibernateService.BotCalendarService;
 
-import java.sql.Timestamp;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
+import java.util.List;
 
 public class main {
     static BotSession session = null;
@@ -38,11 +35,9 @@ public class main {
 
     //2021-03-27 11:56:13.445000
     private static void test() throws ParseException {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/M/yyyy");
-
-        String date = "20/4/2021";
-
-// конвертируем String в LocalDate
-        LocalDate localDate = LocalDate.parse(date, formatter);
+        Long l = 1123699229L;
+        List<? extends MainModel> list = BotCalendarService.getAllUserTasksForDay(l);
+        BotCalendarModel bcm = (BotCalendarModel) list.get(0);
+        System.out.println(bcm.getAddUpdFlag());
     }
 }

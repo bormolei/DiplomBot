@@ -1,15 +1,16 @@
 package service.Calendar;
 
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import model.BotCalendarModel;
+import model.MainModel;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import Exceptions.Calendar.MonthException;
+import service.HibernateService.BotCalendarService;
 import service.Telegram.TelegramKeyboard;
 
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Year;
-import java.util.ArrayList;
 import java.util.List;
 
 public class BotCalendarMethods extends TelegramKeyboard {
@@ -97,7 +98,7 @@ public class BotCalendarMethods extends TelegramKeyboard {
                     .setCallbackData("Calendar'Month''" + (month + 1) + "'" + localYear));
         }
         keyboardButtonsMonthYear.add(new InlineKeyboardButton().setText(Month.of(month).toString() + " " + year)
-                .setCallbackData("Calendar'ChooseMonthButton'''" + localYear));
+                .setCallbackData("Calendar'ChooseMonthButton'''" + year));
         switch (month) {
             case 1:
             case 3:
@@ -134,7 +135,7 @@ public class BotCalendarMethods extends TelegramKeyboard {
 
     protected static ReplyKeyboard createKeyBoardForDay(int date, int month, int year, List<List<InlineKeyboardButton>> rowList) {
         keyboardButtonsRow1.add(new InlineKeyboardButton().setText("Добавить заметку")
-                .setCallbackData(String.format("Calendar'add'%s/%s/%s",date, month, year)));
+                .setCallbackData(String.format("Calendar'add'%s/%s/%s", date, month, year)));
         keyboardButtonsRow1.add(new InlineKeyboardButton().setText("Назад")
                 .setCallbackData("Month''" + month + "'" + year));
         rowList.add(keyboardButtonsRow1);
@@ -142,6 +143,17 @@ public class BotCalendarMethods extends TelegramKeyboard {
         return inlineKeyboardMarkup;
     }
 
+    public static BotCalendarModel readyForTask(Long chatId) {
+        List<? extends MainModel> userDays = BotCalendarService.getAllUserTasksForDay(chatId);
+        BotCalendarModel user = null;
+        for (MainModel userDay : userDays) {
+            user = (BotCalendarModel) userDay;
+            if (user.getAddUpdFlag()) {
+                return user;
+            }
+        }
+        return null;
+    }
 
 
 }
