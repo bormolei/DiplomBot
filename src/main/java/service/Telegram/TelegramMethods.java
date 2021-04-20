@@ -62,7 +62,10 @@ public class TelegramMethods extends TelegramService {
                             List<String> userMessage = Arrays.asList(message.getText().split("-"));
                             try {
                                 bcm.setTime(BotCalendarDateConverter.parceTime(userMessage.get(0)));
-                                bcm.setTask(userMessage.get(1));
+                                String tasks = bcm.getTask();
+                                tasks+="\n"+userMessage.get(1);
+                                bcm.setTask(tasks);
+                                bcm.setAddUpdFlag(false);
                                 BotCalendarService.addTask(bcm);
                                 sendMessage.setText("Ваша заметка на " + bcm.getDate()
                                         + " " + bcm.getTime()
@@ -108,6 +111,8 @@ public class TelegramMethods extends TelegramService {
     }
 
     public static void sendMsgFromCallBack(CallbackQuery callbackQuery, BotTelegram botTelegram) throws TelegramApiException, MonthException {
+        bcm.clearFields();
+        user.clearFields();
         messageOptions(callbackQuery.getMessage());
         editMessageOptions(callbackQuery.getMessage());
         switch (callbackQuery.getData().split("'")[0]) {

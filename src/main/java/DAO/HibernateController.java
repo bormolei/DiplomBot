@@ -24,10 +24,8 @@ public class HibernateController {
     private static void switchByActions(MainModel mainModel, Actions action, Session session) {
         switch (action) {
             case SAVE:
-                session.save(mainModel);
-                break;
             case UPDATE:
-                session.update(mainModel);
+                session.saveOrUpdate(mainModel);
                 break;
             case DELETE:
                 session.delete(mainModel);

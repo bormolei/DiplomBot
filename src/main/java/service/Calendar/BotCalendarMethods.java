@@ -137,7 +137,7 @@ public class BotCalendarMethods extends TelegramKeyboard {
         keyboardButtonsRow1.add(new InlineKeyboardButton().setText("Добавить заметку")
                 .setCallbackData(String.format("Calendar'add'%s/%s/%s", date, month, year)));
         keyboardButtonsRow1.add(new InlineKeyboardButton().setText("Назад")
-                .setCallbackData("Month''" + month + "'" + year));
+                .setCallbackData("Calendar'Month''" + month + "'" + year));
         rowList.add(keyboardButtonsRow1);
         inlineKeyboardMarkup.setKeyboard(rowList);
         return inlineKeyboardMarkup;
