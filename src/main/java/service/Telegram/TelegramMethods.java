@@ -46,7 +46,7 @@ public class TelegramMethods extends TelegramService {
             } else if (Commands.fromString(message.getText()).isPresent()) {
                 chosenCommand(message);
             } else {
-                switch (user.getMode()) {
+                switch (user.getMode().toUpperCase()) {
                     case "WEATHER":
                         String weatherAnswer = weatherParser.getReadyForecast(message.getText(), 1);
                         if (weatherAnswer.contains("Сервис") || weatherAnswer.contains("режим")) {
@@ -63,7 +63,11 @@ public class TelegramMethods extends TelegramService {
                             try {
                                 bcm.setTime(BotCalendarDateConverter.parceTime(userMessage.get(0)));
                                 String tasks = bcm.getTask();
-                                tasks+="\n"+userMessage.get(1);
+                                if (tasks == null) {
+                                    tasks = userMessage.get(1);
+                                } else {
+                                    tasks += "\n" + userMessage.get(1);
+                                }
                                 bcm.setTask(tasks);
                                 bcm.setAddUpdFlag(false);
                                 BotCalendarService.addTask(bcm);
@@ -77,7 +81,7 @@ public class TelegramMethods extends TelegramService {
                             }
                         }
                         break;
-                    case "Main":
+                    case "MAIN":
                         sendMessage.setText("Выберите режим");
                         break;
                 }

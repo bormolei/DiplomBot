@@ -132,7 +132,6 @@ public class TelegramService {
         } else {
             bcm.setChatId(chatId);
             bcm.setDate(ld);
-            bcm.setTask("");
         }
         bcm.setAddUpdFlag(true);
     }
@@ -158,7 +157,7 @@ public class TelegramService {
             int year = Integer.parseInt(callbackQuery.getData().split("'")[4]);
             LocalDate ld = LocalDate.of(year, month, date);
             String tasks = getUserDay(ld, BotCalendarService.getAllUserTasksForDay(callbackQuery.getMessage().getChatId()));
-            editMessageText.setText(String.format("Запланированные дела на %s-%s-%s"+tasks, date, month, year))
+            editMessageText.setText(String.format("Запланированные дела на %s-%s-%s\n"+tasks, date, month, year))
                     .setReplyMarkup((InlineKeyboardMarkup) BotCalendar.taskList(date, month, year));
         } else if (callbackQuery.getData().split("'")[1].equals("add")) {
             try {
