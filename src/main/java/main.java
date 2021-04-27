@@ -17,7 +17,7 @@ import service.HibernateService.BotCalendarService;
 
 import java.io.InputStreamReader;
 import java.text.ParseException;
-import java.util.List;
+import java.util.*;
 
 public class main {
     static BotSession session = null;
@@ -47,16 +47,50 @@ public class main {
         Response response = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .get(str);
-        JsonObject s = new JsonParser()
+        JsonArray s = new JsonParser()
                 .parse(new InputStreamReader(response.asInputStream()))
                 .getAsJsonObject().get("countries")
-                .getAsJsonArray()
-                .get(200)//При необходимости сделать цикл
-                .getAsJsonObject();
+                .getAsJsonArray();
+//                .get(200)//При необходимости сделать цикл
+//                .getAsJsonObject();
 //                .get("text")
 //                .toString()
 //                .replace("\"","");
-        System.out.println();
+        String myCity = "Москва";
+        s.get(0);
+        Map<Integer, String> yandexRasp = new HashMap<>();
+//        for (int i = 0; i < s.size(); i++) {
+//            String country = s.get(i).getAsJsonObject().get("title").toString();
+//            yandexRasp.put(i, country);
+//        }
+//        yandexRasp.entrySet().forEach(System.out::println);
+        String country;
+        String region;
+        Map<String, String> l = new HashMap();
+        List tset = new ArrayList();
+        JsonArray regions;
+        JsonArray settlements;
+        JsonObject city;
+        for (int i = 0; i < s.size(); i++) {
+            country = s.get(i).getAsJsonObject().get("title").toString().replace("\"","");
+            regions = s.get(i).getAsJsonObject().getAsJsonArray("regions");
+            for (int j = 0; j < regions.size(); j++) {
+                region = regions.get(j).getAsJsonObject().get("title").toString().replace("\"", "");
+                settlements = regions.get(j).getAsJsonObject().getAsJsonArray("settlements");
+                for (int k = 0; k < settlements.size(); k++) {
+                    city = settlements.get(k).getAsJsonObject();
+                    String cityName = city.get("title").toString().replace("\"", "");
+                    if (cityName.equals(myCity)) {
+                        System.out.println(country + " " + region + " " + cityName + " " + city.getAsJsonObject("codes").get("yandex_code").toString().replace("\"",""));
+                    }
+                    ; //ДОДЕЛАТЬ
+                }
+
+            }
+
+
+        }
+        System.out.println("finish");
 //        JsonArray json = new JsonArray(response);
 //        Long l = 1123699229L;
 //        List<? extends MainModel> list = BotCalendarService.getAllUserTasksForDay(l);
