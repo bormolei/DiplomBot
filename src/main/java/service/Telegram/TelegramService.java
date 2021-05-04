@@ -5,6 +5,7 @@ import com.byteowls.jopencage.JOpenCageGeocoder;
 import com.byteowls.jopencage.model.JOpenCageResponse;
 import com.byteowls.jopencage.model.JOpenCageReverseRequest;
 import model.BotCalendarModel;
+import model.MainModel;
 import model.User;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
@@ -15,18 +16,19 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import service.Calendar.BotCalendar;
+import service.Calendar.BotCalendarDateConverter;
 import service.HibernateService.BotCalendarService;
 import service.HibernateService.UserService;
 import service.Weather.WeatherBot;
 import service.Weather.WeatherParser;
 
-import java.text.SimpleDateFormat;
+import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 public class TelegramService {
-    protected static BotCalendarModel btm = new BotCalendarModel();
+    protected static BotCalendarModel bcm = new BotCalendarModel();
     protected static User user = new User();
     protected static WeatherParser weatherParser = new WeatherBot();
     protected static SendMessage sendMessage;
@@ -70,16 +72,16 @@ public class TelegramService {
 
     protected static InlineKeyboardMarkup chooseAnswer(CallbackQuery callbackQuery) throws MonthException {
         int date, month = 0, year = 0;
-        if (!callbackQuery.getData().split("'")[1].equals("")) {
-            date = Integer.parseInt(callbackQuery.getData().split("'")[1]);
-        }
         if (!callbackQuery.getData().split("'")[2].equals("")) {
-            month = Integer.parseInt(callbackQuery.getData().split("'")[2]);
+            date = Integer.parseInt(callbackQuery.getData().split("'")[2]);
         }
         if (!callbackQuery.getData().split("'")[3].equals("")) {
-            year = Integer.parseInt(callbackQuery.getData().split("'")[3]);
+            month = Integer.parseInt(callbackQuery.getData().split("'")[3]);
         }
-        switch (callbackQuery.getData().split("'")[0]) {
+        if (!callbackQuery.getData().split("'")[4].equals("")) {
+            year = Integer.parseInt(callbackQuery.getData().split("'")[4]);
+        }
+        switch (callbackQuery.getData().split("'")[1]) {
             case "ChooseMonthButton":
                 return (InlineKeyboardMarkup) BotCalendar.createYear(year);
             case "Month":
@@ -113,13 +115,77 @@ public class TelegramService {
         List<KeyboardRow> keyboardRows = new ArrayList<>();
         KeyboardRow keyboardFirstRow = new KeyboardRow();
 
-        keyboardFirstRow.add(new KeyboardButton("Отправить свою локацию").setRequestLocation(true));
+        keyboardFirstRow.add(new KeyboardButton("Отправить свое местоположение").setRequestLocation(true));
+        keyboardFirstRow.add(new KeyboardButton("На главную"));
 
         keyboardRows.add(keyboardFirstRow);
         replyKeyboardMarkup.setKeyboard(keyboardRows);
     }
 
-    protected static void showTasksForDay() {
-//        BotCalendarService.
+    protected static void setNewTaskForDay(CallbackQuery callbackQuery) throws ParseException {
+        Long chatId = callbackQuery.getMessage().getChatId();
+        LocalDate ld = (BotCalendarDateConverter.fromStringToDate(callbackQuery.getData().split("'")[2]));
+        List<? extends MainModel> userDays = BotCalendarService.getAllUserTasksForDay(chatId);
+        int bcmNumber = BotCalendar.hasUserDay(userDays, ld);
+        if(bcmNumber!=-1){
+            bcm = (BotCalendarModel) userDays.get(bcmNumber);
+        } else {
+            bcm.setChatId(chatId);
+            bcm.setDate(ld);
+        }
+        bcm.setAddUpdFlag(true);
+    }
+
+    private static KeyboardButton backToMain() {
+        return new KeyboardButton("На главную");
+    }
+
+    private static String getUserDay(LocalDate date, List<? extends MainModel> userDays) {
+        for (MainModel userDay : userDays) {
+            bcm = (BotCalendarModel) userDay;
+            if (bcm.getDate().equals(date)) {
+                return bcm.getTask();
+            }
+        }
+        return "Запланированных дел нет";
+    }
+
+    protected static void calendarCallBack(CallbackQuery callbackQuery) throws MonthException {
+        if (callbackQuery.getData().split("'")[1].equals("date")) {
+            int date = Integer.parseInt(callbackQuery.getData().split("'")[2]);
+            int month = Integer.parseInt(callbackQuery.getData().split("'")[3]);
+            int year = Integer.parseInt(callbackQuery.getData().split("'")[4]);
+            LocalDate ld = LocalDate.of(year, month, date);
+            String tasks = getUserDay(ld, BotCalendarService.getAllUserTasksForDay(callbackQuery.getMessage().getChatId()));
+            editMessageText.setText(String.format("Запланированные дела на %s-%s-%s\n"+tasks, date, month, year))
+                    .setReplyMarkup((InlineKeyboardMarkup) BotCalendar.taskList(date, month, year));
+        } else if (callbackQuery.getData().split("'")[1].equals("add")) {
+            try {
+                setNewTaskForDay(callbackQuery);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            BotCalendarService.addPrecondition(bcm);
+            editMessageText.setText("Укажите время для вашей заметки и текст заметки" +
+                    "\nобразец \"11:12-Прогулка\"");
+        } else {
+            editMessageText.setText("Выберите месяц")
+                    .setReplyMarkup(chooseAnswer(callbackQuery));
+        }
+    }
+
+    protected static void weatherCallBack(CallbackQuery callbackQuery) throws MonthException {
+        if (callbackQuery.getData().split("'")[0].equals("day")) {
+            String city = callbackQuery.getMessage().getText().split(":")[0];
+            int days = Integer.parseInt(callbackQuery.getData().split("'")[1]);
+            editMessageText.setText(weatherParser.getReadyForecast(city, days))
+                    .setReplyMarkup((InlineKeyboardMarkup) WeatherBot.createHours(days));
+
+        }
+    }
+
+    protected static void backToMainMenu(CallbackQuery callbackQuery) {
+        setButtons(sendMessage);
+        sendMessage.setText("Выберите режим");
     }
 }

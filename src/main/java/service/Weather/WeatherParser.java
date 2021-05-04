@@ -2,5 +2,5 @@ package service.Weather;
 
 public interface WeatherParser {
 
-    String getReadyForecast(String city);
+    String getReadyForecast(String city,int days);
 }

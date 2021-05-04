@@ -24,10 +24,8 @@ public class HibernateController {
     private static void switchByActions(MainModel mainModel, Actions action, Session session) {
         switch (action) {
             case SAVE:
-                session.save(mainModel);
-                break;
             case UPDATE:
-                session.update(mainModel);
+                session.saveOrUpdate(mainModel);
                 break;
             case DELETE:
                 session.delete(mainModel);
@@ -35,31 +33,31 @@ public class HibernateController {
         }
     }
 
-    public static List allUsers(MainModel mainModel){
-        try(Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()){
+    public static List allUsers(MainModel mainModel) {
+        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
             CriteriaQuery criteria = session.getCriteriaBuilder().createQuery(mainModel.getClass());
             criteria.from(mainModel.getClass());
             return session.createQuery(criteria).getResultList();
         }
     }
 
-    public static List<? extends MainModel> getColumnByField(MainModel mainModel, String field){
-        try(Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+    public static List<? extends MainModel> getColumnByField(MainModel mainModel, String field) {
+        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
             CriteriaBuilder builder = session.getCriteriaBuilder();
             CriteriaQuery<? extends MainModel> criteria = builder.createQuery(mainModel.getClass());
             Root<? extends MainModel> root = criteria.from(mainModel.getClass());
             criteria.select(root.get(field));
             criteria.from(mainModel.getClass());
-            return  session.createQuery(criteria).getResultList();
+            return session.createQuery(criteria).getResultList();
         }
     }
 
-    public static List<? extends MainModel> getRowsByField(MainModel mainModel, String fieldName, Long condition){
-        try(Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+    public static List<? extends MainModel> getRowsByField(MainModel mainModel, String fieldName, Long condition) {
+        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
             CriteriaBuilder builder = session.getCriteriaBuilder();
             CriteriaQuery<? extends MainModel> criteria = builder.createQuery(mainModel.getClass());
             Root root = criteria.from(mainModel.getClass());
-            criteria.select(root).where(builder.equal(root.get(fieldName),condition));
+            criteria.select(root).where(builder.equal(root.get(fieldName), condition));
             return session.createQuery(criteria).getResultList();
         }
     }

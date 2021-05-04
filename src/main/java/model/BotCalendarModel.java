@@ -1,8 +1,8 @@
 package model;
 
 import javax.persistence.*;
-import java.sql.Time;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "calendar")
@@ -15,13 +15,16 @@ public class BotCalendarModel extends MainModel {
     private Long chatId;
 
     @Column(name = "date")
-    private Date date;
+    private LocalDate date;
+
+    @Column(name = "time")
+    private LocalTime time;
 
     @Column(name = "task")
     private String task;
 
-    @Column(name = "time")
-    private Time time;
+    @Column(name = "addupd")
+    private Boolean addUpdFlag;
 
     public Long getChatId() {
         return chatId;
@@ -31,11 +34,11 @@ public class BotCalendarModel extends MainModel {
         this.chatId = chatId;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
@@ -47,20 +50,29 @@ public class BotCalendarModel extends MainModel {
         this.task = task;
     }
 
-    public Time getTime() {
+    public LocalTime getTime() {
         return time;
     }
 
-    public void setTime(Time time) {
+    public void setTime(LocalTime time) {
         this.time = time;
+    }
+
+    public Boolean getAddUpdFlag() {
+        return addUpdFlag;
+    }
+
+    public void setAddUpdFlag(Boolean addUpdFlag) {
+        this.addUpdFlag = addUpdFlag;
     }
 
     @Override
     public void clearFields() {
-        id= null;
-        chatId= null;
-        date= null;
-        task= null;
-        time= null;
+        id = null;
+        chatId = null;
+        date = null;
+        task = null;
+        time = null;
+        addUpdFlag = null;
     }
 }
