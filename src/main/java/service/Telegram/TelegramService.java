@@ -59,7 +59,7 @@ public class TelegramService {
         }
     }
 
-    protected static String parceGeo(Message message) {
+    protected static String parseGeo(Message message) {
         JOpenCageGeocoder jOpenCageGeocoder = new JOpenCageGeocoder("ac2f76c5d0f049db9a15d712ad3db49c");
         JOpenCageReverseRequest request = new JOpenCageReverseRequest(message.getLocation().getLatitude().doubleValue(), message.getLocation().getLongitude().doubleValue());
         request.setLanguage("ru");
@@ -67,7 +67,7 @@ public class TelegramService {
         request.setNoAnnotations(true);
         request.setMinConfidence(3);
         JOpenCageResponse response = jOpenCageGeocoder.reverse(request);
-        return response.getResults().get(0).getFormatted().split(", ")[2];
+        return response.getResults().get(0).getComponents().getCity();
     }
 
     protected static InlineKeyboardMarkup chooseAnswer(CallbackQuery callbackQuery) throws MonthException {

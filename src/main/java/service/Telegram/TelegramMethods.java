@@ -11,10 +11,12 @@ import service.Calendar.BotCalendarDateConverter;
 import service.Calendar.BotCalendarMethods;
 import service.HibernateService.BotCalendarService;
 import service.HibernateService.UserService;
+import service.Tickets.TicketsMain;
 import service.Weather.WeatherBot;
 import utils.Commands;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
@@ -41,7 +43,7 @@ public class TelegramMethods extends TelegramService {
         try {
             setButtons(sendMessage);
             if (message.hasLocation()) {
-                sendMessage.setText(weatherParser.getReadyForecast(parceGeo(message), 1))
+                sendMessage.setText(weatherParser.getReadyForecast(parseGeo(message), 1))
                         .setReplyMarkup(WeatherBot.createHours(1));
             } else if (Commands.fromString(message.getText()).isPresent()) {
                 chosenCommand(message);
@@ -81,6 +83,9 @@ public class TelegramMethods extends TelegramService {
                             }
                         }
                         break;
+                    case "TICKET":
+                        TicketsMain.getWay(message,sendMessage);
+                        break;
                     case "MAIN":
                         sendMessage.setText("Выберите режим");
                         break;
@@ -106,6 +111,12 @@ public class TelegramMethods extends TelegramService {
                 changeModeForUser(Commands.CALENDAR.toString());
                 sendMessage.setText("Выберите число")
                         .setReplyMarkup(BotCalendar.createMonth(currentMonth, LocalDate.now().getYear()));
+                break;
+            case "Транспортные билеты":
+                changeModeForUser(Commands.TICKET.toString());
+                sendMessage.setText("Напишите \"Москва Париж "
+                        + LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                        + "\" чтобы узнать о возможны вариантах путешествия.");
                 break;
             case "На главную":
                 changeModeForUser(Commands.Main.toString());

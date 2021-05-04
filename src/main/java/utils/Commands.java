@@ -6,7 +6,8 @@ import java.util.stream.Stream;
 public enum Commands {
     WEATHER("Погода"),
     CALENDAR("Календарь"),
-    Main("На главную");
+    Main("На главную"),
+    TICKET("Транспортные билеты");
 
     private final String  value;
     Commands(String value) {
