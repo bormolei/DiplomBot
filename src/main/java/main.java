@@ -32,14 +32,5 @@ public class main {
 
     //2021-03-27 11:56:13.445000
     private static void test() throws ParseException {
-        String from = TicketsMain.getTicketInfo("Кострома");
-        String to = TicketsMain.getTicketInfo("Москва");
-        TicketsMain.getRzdURI(from, to,"");
-        System.out.println("finish");
-//        JsonArray json = new JsonArray(response);
-//        Long l = 1123699229L;
-//        List<? extends MainModel> list = BotCalendarService.getAllUserTasksForDay(l);
-//        BotCalendarModel bcm = (BotCalendarModel) list.get(0);
-//        System.out.println(bcm.getAddUpdFlag());
     }
 }
