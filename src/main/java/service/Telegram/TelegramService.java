@@ -34,6 +34,7 @@ public class TelegramService {
     protected static SendMessage sendMessage;
     protected static EditMessageText editMessageText;
     protected static ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+    protected static List ticketWays = new ArrayList();
 
 
     public static String checkMode(Long chatId) {

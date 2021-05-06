@@ -4,6 +4,7 @@ import Exceptions.Calendar.MonthException;
 import Telegram.BotTelegram;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import service.Calendar.BotCalendar;
@@ -84,7 +85,8 @@ public class TelegramMethods extends TelegramService {
                         }
                         break;
                     case "TICKET":
-                        TicketsMain.getWay(message,sendMessage);
+                        ticketWays = TicketsMain.getWay(message);
+                        sendMessage.setText(ticketWays.get(0).toString()).setReplyMarkup((ReplyKeyboard) ticketWays.get(1));
                         break;
                     case "MAIN":
                         sendMessage.setText("Выберите режим");

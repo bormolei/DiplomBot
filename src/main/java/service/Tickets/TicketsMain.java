@@ -7,7 +7,6 @@ import com.google.gson.JsonParser;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -29,7 +28,7 @@ public class TicketsMain extends TelegramKeyboard {
             .getAsJsonObject().get("countries")
             .getAsJsonArray();
     static List<String> l = new ArrayList<>();
-    static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d-M-yyyy");
+    static DateTimeFormatter formatter;
     static List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
 
     public static String getTicketInfo(String findCity) {
@@ -68,74 +67,94 @@ public class TicketsMain extends TelegramKeyboard {
         return "Данный город не найден";
     }
 
-    public static void getWay(Message message, SendMessage sendMessage) {
+    public static List<Object> getWay(Message message) {
         TelegramKeyboard.clearKeyBoard();
         rowList.clear();
         if (!l.isEmpty()) {
             l.clear();
         }
+        formatter = DateTimeFormatter.ofPattern("d-M-yyyy");
         l = Lists.newArrayList(message.getText().split(" "));
         String from = TicketsMain.getTicketInfo(l.get(0));
         String to = TicketsMain.getTicketInfo(l.get(1));
         LocalDate travelDate = LocalDate.parse(l.get(2), formatter);
-        sendMessage.setText("test").setReplyMarkup(getRzdURI(from, to, travelDate.toString(),0));
+        List<Object> trainWays = new ArrayList<>();
+        String wayName = "Отправление: " + l.get(0)
+                + "\nПрибытие: " + l.get(1)
+                + "\nДата: " + l.get(2)
+                + "\nВарианты отправления";
+        trainWays.add(wayName);
+        trainWays.add(getRzdURI(from, to, travelDate.toString(), 0));
+        return trainWays;
     }
 
-    public static ReplyKeyboard getRzdURI(String from, String to, String date,int recordNumber) {
+    public static ReplyKeyboard getRzdURI(String from, String to, String date, int recordNumber) {
         String rasp = "https://api.rasp.yandex.net/v3.0/search/?apikey=1324d008-778c-4fca-a057-2c7ce97c7b92&format=json&from=" + from + "&to=" + to + "&lang=ru_RU&date=" + date + "&transport_types=train";
         response = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .get(rasp);
-
         JsonObject jo = jsonParser.parse(new InputStreamReader(response.asInputStream()))
                 .getAsJsonObject();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
-
-
-//        for (int i = 0; i < segments.size(); i++) {
-//            if (segments.size() > 6) {
-//                //добавить прокручивание страниц в нижнюю строку
-//            }
-        int nextPage = recordNumber+6;
+        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
+        int nextPage = recordNumber + 5;
         int previousPage;
-        if(recordNumber>5){
-            previousPage = recordNumber-6;
+        if (recordNumber > 4) {
+            previousPage = recordNumber - 5;
         } else {
-            previousPage =0;
+            previousPage = 0;
         }
-        int maxNumber = recordNumber +6;
         JsonArray segments = jo.get("segments").getAsJsonArray();
-        for (int i = recordNumber; i<segments.size();i++) {
-            LocalDateTime ld = LocalDateTime.parse(jo.get("segments").getAsJsonArray().get(2).getAsJsonObject()
+        String toCallBack = l.get(0) + " " + l.get(1) + " " + l.get(2);
+
+//        if (segments.size() > 5 && changeButtonsRow.isEmpty()) {
+//            changeButtonsRow.add(new InlineKeyboardButton().setText("<")
+//                    .setCallbackData("next tickets'" + nextPage + "'" + toCallBack));
+//            changeButtonsRow.add(new InlineKeyboardButton().setText(">")
+//                    .setCallbackData("previous tickets'" + previousPage + "'" + toCallBack));
+//        }
+        buttons(from, to, date, segments, recordNumber, recordNumber + 5);
+
+        rowList.add(keyboardButtonsRow1);
+        rowList.add(keyboardButtonsRow2);
+        rowList.add(keyboardButtonsRow3);
+        rowList.add(keyboardButtonsRow4);
+        rowList.add(keyboardButtonsRow5);
+        rowList.add(changeButtonsRow);
+        inlineKeyboardMarkup.setKeyboard(rowList);
+        return inlineKeyboardMarkup;
+    }
+
+    private static void buttons(String from, String to, String date, JsonArray segments, int startPoint, int endPoint) {
+
+        for (int i = 0; i < endPoint; startPoint++, i++) {
+            LocalDateTime ldDeparture = LocalDateTime.parse(segments.get(startPoint).getAsJsonObject()
                     .get("departure").toString().replace("\"", ""), formatter);
-            String time = ld.getHour() + "." + ld.getMinute();
-            String number = jo.get("segments").getAsJsonArray()
-                    .get(i).getAsJsonObject()
+            String departureTime = ldDeparture.toLocalTime().toString();
+            LocalDateTime ldArrival = LocalDateTime.parse(segments.get(startPoint).getAsJsonObject()
+                    .get("arrival").toString().replace("\"", ""), formatter);
+            String arrivalTime = ldArrival.toLocalTime().toString();
+            String number = segments
+                    .get(startPoint).getAsJsonObject()
                     .get("thread").getAsJsonObject()
                     .get("number").toString().replace("\"", "");
 
-
-            if (segments.size() > 6&&changeButtonsRow.isEmpty()) {
-                changeButtonsRow.add(new InlineKeyboardButton().setText("<")
-                        .setCallbackData("next tickets'" + nextPage));
-                changeButtonsRow.add(new InlineKeyboardButton().setText(">")
-                        .setCallbackData("previous tickets'" + previousPage));
-            }
-            String way_name = "Отправление из "+from+".Прибытие в "+to+"Дата:"+date+"Время отправления:"+time;
-            if (i < 2){
-                keyboardButtonsRow1.add(new InlineKeyboardButton().setText(way_name)
-                        .setUrl("https://travel.yandex.ru/trains/order/?adults=1&fromId=" + from + "&&number=" + number + "&time=" + time + "&toId=" + to + "&&when=" + date));
-            }else if (i < 4) {
-                keyboardButtonsRow2.add(new InlineKeyboardButton().setText(way_name)
-                        .setUrl("https://travel.yandex.ru/trains/order/?adults=1&fromId=" + from + "&&number=" + number + "&time=" + time + "&toId=" + to + "&&when=" + date));
-            }else {
-                keyboardButtonsRow3.add(new InlineKeyboardButton().setText(way_name)
-                        .setUrl("https://travel.yandex.ru/trains/order/?adults=1&fromId=" + from + "&&number=" + number + "&time=" + time + "&toId=" + to + "&&when=" + date));
+            String wayTime = "Отправление: " + departureTime + " - Прибытие: " + arrivalTime;
+            if (i == 0) {
+                keyboardButtonsRow1.add(new InlineKeyboardButton().setText(wayTime)
+                        .setUrl("https://travel.yandex.ru/trains/order/?adults=1&fromId=" + from + "&&number=" + number + "&time=" + departureTime + "&toId=" + to + "&&when=" + date));
+            } else if (i == 1) {
+                keyboardButtonsRow2.add(new InlineKeyboardButton().setText(wayTime)
+                        .setUrl("https://travel.yandex.ru/trains/order/?adults=1&fromId=" + from + "&&number=" + number + "&time=" + departureTime + "&toId=" + to + "&&when=" + date));
+            } else if (i == 2) {
+                keyboardButtonsRow3.add(new InlineKeyboardButton().setText(wayTime)
+                        .setUrl("https://travel.yandex.ru/trains/order/?adults=1&fromId=" + from + "&&number=" + number + "&time=" + departureTime + "&toId=" + to + "&&when=" + date));
+            } else if (i == 3) {
+                keyboardButtonsRow4.add(new InlineKeyboardButton().setText(wayTime)
+                        .setUrl("https://travel.yandex.ru/trains/order/?adults=1&fromId=" + from + "&&number=" + number + "&time=" + departureTime + "&toId=" + to + "&&when=" + date));
+            } else if (i == 4) {
+                keyboardButtonsRow5.add(new InlineKeyboardButton().setText(wayTime)
+                        .setUrl("https://travel.yandex.ru/trains/order/?adults=1&fromId=" + from + "&&number=" + number + "&time=" + departureTime + "&toId=" + to + "&&when=" + date));
             }
         }
-        rowList.add(keyboardButtonsRow1);
-        inlineKeyboardMarkup.setKeyboard(rowList);
-        return inlineKeyboardMarkup;
-//        https://travel.yandex.ru/trains/order/?adults=1&fromId=c7&number=715Я&time=07.12&toId=c213&toName=Москва&when=2021-04-30
     }
 }
