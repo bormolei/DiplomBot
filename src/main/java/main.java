@@ -1,10 +1,12 @@
 import Telegram.BotTelegram;
+import model.TicketsModel;
 import org.apache.log4j.PropertyConfigurator;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.meta.generics.BotSession;
-import service.Tickets.TicketsMain;
+import service.HibernateService.TicketsService;
+import service.Tickets.TicketsMethods;
 
 import java.text.ParseException;
 
@@ -31,6 +33,14 @@ public class main {
     }
 
     //2021-03-27 11:56:13.445000
-    private static void test() throws ParseException {
+    private static void test() {
+        TicketsModel ticketsModel = new TicketsModel();
+        try {
+            ticketsModel = TicketsService.getTicketInfo(381175043L);
+        } catch (IndexOutOfBoundsException e) {
+            ticketsModel.setChatId(381175043L);
+            TicketsService.addNewTicket(ticketsModel);
+        }
+        System.out.println(TicketsMethods.ticketInfo(ticketsModel));
     }
 }

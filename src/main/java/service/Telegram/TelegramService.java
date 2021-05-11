@@ -6,6 +6,7 @@ import com.byteowls.jopencage.model.JOpenCageResponse;
 import com.byteowls.jopencage.model.JOpenCageReverseRequest;
 import model.BotCalendarModel;
 import model.MainModel;
+import model.TicketsModel;
 import model.User;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
@@ -30,6 +31,7 @@ import java.util.List;
 public class TelegramService {
     protected static BotCalendarModel bcm = new BotCalendarModel();
     protected static User user = new User();
+    protected static TicketsModel ticketsModel = new TicketsModel();
     protected static WeatherParser weatherParser = new WeatherBot();
     protected static SendMessage sendMessage;
     protected static EditMessageText editMessageText;

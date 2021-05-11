@@ -4,15 +4,15 @@ import Exceptions.Calendar.MonthException;
 import Telegram.BotTelegram;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import service.Calendar.BotCalendar;
 import service.Calendar.BotCalendarDateConverter;
 import service.Calendar.BotCalendarMethods;
 import service.HibernateService.BotCalendarService;
+import service.HibernateService.TicketsService;
 import service.HibernateService.UserService;
-import service.Tickets.TicketsMain;
+import service.Tickets.TicketsMethods;
 import service.Weather.WeatherBot;
 import utils.Commands;
 
@@ -27,6 +27,7 @@ public class TelegramMethods extends TelegramService {
     public static void sendMsg(Message message, BotTelegram botTelegram) throws TelegramApiException {
         bcm.clearFields();
         user.clearFields();
+        ticketsModel.clearFields();
         try {
             user = UserService.getUser(message.getChatId());
         } catch (IndexOutOfBoundsException e) {
@@ -64,7 +65,7 @@ public class TelegramMethods extends TelegramService {
                         if (bcm != null) {
                             List<String> userMessage = Arrays.asList(message.getText().split("-"));
                             try {
-                                bcm.setTime(BotCalendarDateConverter.parceTime(userMessage.get(0)));
+                                bcm.setTime(BotCalendarDateConverter.parseTime(userMessage.get(0)));
                                 String tasks = bcm.getTask();
                                 if (tasks == null) {
                                     tasks = userMessage.get(1);
@@ -85,8 +86,20 @@ public class TelegramMethods extends TelegramService {
                         }
                         break;
                     case "TICKET":
-                        ticketWays = TicketsMain.getWay(message);
-                        sendMessage.setText(ticketWays.get(0).toString()).setReplyMarkup((ReplyKeyboard) ticketWays.get(1));
+                        try {
+                            ticketsModel = TicketsService.getTicketInfo(message.getChatId());
+                        } catch (IndexOutOfBoundsException e) {
+                            ticketsModel.setChatId(message.getChatId());
+                            TicketsService.addNewTicket(ticketsModel);
+                        }
+                        if(TicketsMethods.hasFullInfo(ticketsModel)) {
+//                            sendMessage.setReplyMarkup();
+                        } else {
+                            TicketsMethods.addField(ticketsModel,message.getText());
+                        }
+                        sendMessage.setText(TicketsMethods.ticketInfo(ticketsModel));
+//                        ticketWays = TicketsMain.getWay(message);
+//                        sendMessage.setText(ticketWays.get(0).toString()).setReplyMarkup((ReplyKeyboard) ticketWays.get(1));
                         break;
                     case "MAIN":
                         sendMessage.setText("Выберите режим");

@@ -6,7 +6,7 @@ import java.time.LocalTime;
 
 @Entity
 @Table(name = "calendar")
-public class BotCalendarModel extends MainModel {
+public class BotCalendarModel implements MainModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

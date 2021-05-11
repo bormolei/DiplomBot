@@ -34,28 +34,18 @@ public class TicketsMain extends TelegramKeyboard {
     public static String getTicketInfo(String findCity) {
         s.get(0);
         Map<Integer, String> yandexRasp = new HashMap<>();
-//        for (int i = 0; i < s.size(); i++) {
-//            String country = s.get(i).getAsJsonObject().get("title").toString();
-//            yandexRasp.put(i, country);
-//        }
-//        yandexRasp.entrySet().forEach(System.out::println);
-        String country;
-        String region;
         JsonArray regions;
         JsonArray settlements;
         JsonObject city;
         for (int i = 0; i < s.size(); i++) {
-            country = s.get(i).getAsJsonObject().get("title").toString().replace("\"", "");
             regions = s.get(i).getAsJsonObject().getAsJsonArray("regions");
             for (int j = 0; j < regions.size(); j++) {
-                region = regions.get(j).getAsJsonObject().get("title").toString().replace("\"", "");
                 settlements = regions.get(j).getAsJsonObject().getAsJsonArray("settlements");
                 for (int k = 0; k < settlements.size(); k++) {
                     city = settlements.get(k).getAsJsonObject();
                     String cityName = city.get("title").toString().replace("\"", "");
                     if (cityName.equals(findCity)) {
                         return city.getAsJsonObject("codes").get("yandex_code").toString().replace("\"", "");
-//                        return country + " " + region + " " + cityName + " " + city.getAsJsonObject("codes").get("yandex_code").toString().replace("\"","");
                     }
                     //ДОДЕЛАТЬ
                 }
@@ -105,13 +95,7 @@ public class TicketsMain extends TelegramKeyboard {
         }
         JsonArray segments = jo.get("segments").getAsJsonArray();
         String toCallBack = l.get(0) + " " + l.get(1) + " " + l.get(2);
-
-//        if (segments.size() > 5 && changeButtonsRow.isEmpty()) {
-//            changeButtonsRow.add(new InlineKeyboardButton().setText("<")
-//                    .setCallbackData("next tickets'" + nextPage + "'" + toCallBack));
-//            changeButtonsRow.add(new InlineKeyboardButton().setText(">")
-//                    .setCallbackData("previous tickets'" + previousPage + "'" + toCallBack));
-//        }
+        
         buttons(from, to, date, segments, recordNumber, recordNumber + 5);
 
         rowList.add(keyboardButtonsRow1);
