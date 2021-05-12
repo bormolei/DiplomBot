@@ -63,6 +63,12 @@ public class TicketsModel implements MainModel {
         this.departureDate = null;
     }
 
+    public void clearFieldsToDB(){
+        this.departureCity = null;
+        this.arrivalCity = null;
+        this.departureDate = null;
+    }
+
     public String getInfoAboutTicket() {
         String result = "";
         if (departureCity != null) {

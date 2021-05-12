@@ -12,6 +12,7 @@ import service.Calendar.BotCalendarMethods;
 import service.HibernateService.BotCalendarService;
 import service.HibernateService.TicketsService;
 import service.HibernateService.UserService;
+import service.Tickets.TicketsMain;
 import service.Tickets.TicketsMethods;
 import service.Weather.WeatherBot;
 import utils.Commands;
@@ -92,12 +93,13 @@ public class TelegramMethods extends TelegramService {
                             ticketsModel.setChatId(message.getChatId());
                             TicketsService.addNewTicket(ticketsModel);
                         }
-                        if(TicketsMethods.hasFullInfo(ticketsModel)) {
-//                            sendMessage.setReplyMarkup();
-                        } else {
-                            TicketsMethods.addField(ticketsModel,message.getText());
+                        if (!TicketsMethods.hasFullInfo(ticketsModel)) {
+                            TicketsMethods.addField(ticketsModel, message.getText());
                         }
                         sendMessage.setText(TicketsMethods.ticketInfo(ticketsModel));
+                        if (TicketsMethods.hasFullInfo(ticketsModel)) {
+                            sendMessage.setReplyMarkup(TicketsMain.getAccept());
+                        }
 //                        ticketWays = TicketsMain.getWay(message);
 //                        sendMessage.setText(ticketWays.get(0).toString()).setReplyMarkup((ReplyKeyboard) ticketWays.get(1));
                         break;
@@ -143,6 +145,7 @@ public class TelegramMethods extends TelegramService {
     public static void sendMsgFromCallBack(CallbackQuery callbackQuery, BotTelegram botTelegram) throws TelegramApiException, MonthException {
         bcm.clearFields();
         user.clearFields();
+        user = UserService.getUser(callbackQuery.getMessage().getChatId());
         messageOptions(callbackQuery.getMessage());
         editMessageOptions(callbackQuery.getMessage());
         switch (callbackQuery.getData().split("'")[0]) {
@@ -151,6 +154,9 @@ public class TelegramMethods extends TelegramService {
                 break;
             case "day":
                 weatherCallBack(callbackQuery);
+                break;
+            case "Ticket":
+                ticketsCallBack(callbackQuery);
                 break;
             case "MainMenu":
                 changeModeForUser(Commands.Main.toString());

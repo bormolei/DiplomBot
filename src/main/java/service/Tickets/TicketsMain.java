@@ -7,7 +7,9 @@ import com.google.gson.JsonParser;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import model.TicketsModel;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import service.Telegram.TelegramKeyboard;
@@ -78,7 +80,9 @@ public class TicketsMain extends TelegramKeyboard {
         return trainWays;
     }
 
-    public static ReplyKeyboard getRzdURI(String from, String to, String date, int recordNumber) {
+    public static InlineKeyboardMarkup getRzdURI(String from, String to, String date, int recordNumber) {
+        TelegramKeyboard.clearKeyBoard();
+        rowList.clear();
         String rasp = "https://api.rasp.yandex.net/v3.0/search/?apikey=1324d008-778c-4fca-a057-2c7ce97c7b92&format=json&from=" + from + "&to=" + to + "&lang=ru_RU&date=" + date + "&transport_types=train";
         response = RestAssured.given()
                 .contentType(ContentType.JSON)
@@ -94,9 +98,12 @@ public class TicketsMain extends TelegramKeyboard {
             previousPage = 0;
         }
         JsonArray segments = jo.get("segments").getAsJsonArray();
-        String toCallBack = l.get(0) + " " + l.get(1) + " " + l.get(2);
-        
-        buttons(from, to, date, segments, recordNumber, recordNumber + 5);
+        if (segments.size() < 6) {
+            ticketsKeyboard(from, to, date, segments, recordNumber, segments.size());
+        } else {
+            ticketsKeyboard(from, to, date, segments, recordNumber, recordNumber + 5);
+        }
+
 
         rowList.add(keyboardButtonsRow1);
         rowList.add(keyboardButtonsRow2);
@@ -108,7 +115,7 @@ public class TicketsMain extends TelegramKeyboard {
         return inlineKeyboardMarkup;
     }
 
-    private static void buttons(String from, String to, String date, JsonArray segments, int startPoint, int endPoint) {
+    private static void ticketsKeyboard(String from, String to, String date, JsonArray segments, int startPoint, int endPoint) {
 
         for (int i = 0; i < endPoint; startPoint++, i++) {
             LocalDateTime ldDeparture = LocalDateTime.parse(segments.get(startPoint).getAsJsonObject()
@@ -140,5 +147,17 @@ public class TicketsMain extends TelegramKeyboard {
                         .setUrl("https://travel.yandex.ru/trains/order/?adults=1&fromId=" + from + "&&number=" + number + "&time=" + departureTime + "&toId=" + to + "&&when=" + date));
             }
         }
+    }
+
+    public static InlineKeyboardMarkup getAccept() {
+        TelegramKeyboard.clearKeyBoard();
+        rowList.clear();
+        keyboardButtonsRow1.add(new InlineKeyboardButton().setText("Все верно")
+                .setCallbackData("Ticket'get"));
+        keyboardButtonsRow1.add(new InlineKeyboardButton().setText("Не верно")
+                .setCallbackData("Ticket'cancel"));
+        rowList.add(keyboardButtonsRow1);
+        inlineKeyboardMarkup.setKeyboard(rowList);
+        return inlineKeyboardMarkup;
     }
 }

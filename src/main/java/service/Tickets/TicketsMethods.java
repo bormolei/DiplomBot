@@ -9,28 +9,27 @@ import java.time.format.DateTimeFormatter;
 public class TicketsMethods {
     public static String ticketInfo(TicketsModel ticket) {
         if (ticket.getDepartureCity() == null) {
-            return "Введите город отправления";
+            return ticket.getInfoAboutTicket() + "\n\n" + "Введите город отправления";
         } else if (ticket.getArrivalCity() == null) {
-            return "Введите город назначения";
+            return ticket.getInfoAboutTicket() + "\n\n" + "Введите город назначения";
         } else if (ticket.getDepartureDate() == null) {
-            return "Введите дату отправления";
-        } else {
-            return ticket.getInfoAboutTicket();
+            return ticket.getInfoAboutTicket() + "\n\n" + "Введите дату отправления";
         }
+        return ticket.getInfoAboutTicket();
     }
 
     public static boolean hasFullInfo(TicketsModel ticket) {
         return ticket.getDepartureCity() != null && ticket.getArrivalCity() != null && ticket.getDepartureDate() != null;
     }
 
-    public static void addField(TicketsModel ticket,String fieldValue){
-        if(ticket.getDepartureCity()==null){
+    public static void addField(TicketsModel ticket, String fieldValue) {
+        if (ticket.getDepartureCity() == null) {
             ticket.setDepartureCity(fieldValue);
-        } else if(ticket.getArrivalCity()==null){
+        } else if (ticket.getArrivalCity() == null) {
             ticket.setArrivalCity(fieldValue);
-        } else if(ticket.getDepartureDate()==null){
+        } else if (ticket.getDepartureDate() == null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d-M-yyyy");
-            ticket.setDepartureDate(LocalDate.parse(fieldValue,formatter));
+            ticket.setDepartureDate(LocalDate.parse(fieldValue, formatter));
         }
         TicketsService.updateTicketInfo(ticket);
     }
