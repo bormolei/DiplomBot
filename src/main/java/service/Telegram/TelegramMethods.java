@@ -94,9 +94,14 @@ public class TelegramMethods extends TelegramService {
                             TicketsService.addNewTicket(ticketsModel);
                         }
                         if (!TicketsMethods.hasFullInfo(ticketsModel)) {
-                            TicketsMethods.addField(ticketsModel, message.getText());
+                            String accuracy = TicketsMain.checkData(ticketsModel,message.getText());
+                            if (accuracy.equals("OK")) {
+                                TicketsMethods.addField(ticketsModel, message.getText());
+                                sendMessage.setText(TicketsMethods.ticketInfo(ticketsModel));
+                            } else {
+                                sendMessage.setText(accuracy);
+                            }
                         }
-                        sendMessage.setText(TicketsMethods.ticketInfo(ticketsModel));
                         if (TicketsMethods.hasFullInfo(ticketsModel)) {
                             sendMessage.setReplyMarkup(TicketsMain.getAccept());
                         }

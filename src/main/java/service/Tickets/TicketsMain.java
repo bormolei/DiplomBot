@@ -18,6 +18,7 @@ import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 public class TicketsMain extends TelegramKeyboard {
@@ -34,8 +35,6 @@ public class TicketsMain extends TelegramKeyboard {
     static List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
 
     public static String getTicketInfo(String findCity) {
-        s.get(0);
-        Map<Integer, String> yandexRasp = new HashMap<>();
         JsonArray regions;
         JsonArray settlements;
         JsonObject city;
@@ -159,5 +158,21 @@ public class TicketsMain extends TelegramKeyboard {
         rowList.add(keyboardButtonsRow1);
         inlineKeyboardMarkup.setKeyboard(rowList);
         return inlineKeyboardMarkup;
+    }
+
+    public static String checkData(TicketsModel ticketsModel,String data){
+        formatter = DateTimeFormatter.ofPattern("d-M-yyyy");
+        if(ticketsModel.getDepartureCity()==null||ticketsModel.getArrivalCity()==null){
+            if(!s.toString().contains(data)) {
+                return "Данного города нет в базе данных " + data;
+            }
+        } else if (ticketsModel.getDepartureDate()==null ){
+            try{
+                LocalDate.parse(data,formatter);
+            }catch (DateTimeParseException exception){
+                return "Неверно введена дата отправления";
+            }
+        }
+        return "OK";
     }
 }
