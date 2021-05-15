@@ -4,7 +4,7 @@
 <!--        <property name="connection.url">jdbc:postgresql://localhost:5432/Personal_Assistant</property>-->
 <!--        <property name="connection.username">postgres</property>-->
 <!--        <property name="connection.password">oxitxmq5q2</property>-->
-        <property name="connection.url">postgres://ptjnsnlojnpuqh:ebc67297632852d25d3cdca9aa37e39a25444c6c87eb1b1a3363d16593f45683@ec2-54-155-87-214.eu-west-1.compute.amazonaws.com:5432/d5psi0onmpaaek
+        <property name="connection.url">jdbc:postgres://ptjnsnlojnpuqh:ebc67297632852d25d3cdca9aa37e39a25444c6c87eb1b1a3363d16593f45683@ec2-54-155-87-214.eu-west-1.compute.amazonaws.com:5432/d5psi0onmpaaek
         </property>
         <property name="connection.username">ptjnsnlojnpuqh</property>
         <property name="connection.password">
