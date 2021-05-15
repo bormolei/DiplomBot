@@ -137,7 +137,7 @@ public class TelegramService {
         if (bcmNumber != -1) {
             bcm = (BotCalendarModel) userDays.get(bcmNumber);
         } else {
-            bcm.setChatId(chatId);
+            bcm.setChatId(UserService.getUser(callbackQuery.getMessage().getChatId()));
             bcm.setDate(ld);
         }
         bcm.setAddUpdFlag(true);

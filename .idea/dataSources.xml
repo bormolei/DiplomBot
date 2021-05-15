@@ -8,5 +8,19 @@
       <jdbc-url>jdbc:postgresql://localhost:5432/Personal_Assistant</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="d5psi0onmpaaek@ec2-54-155-87-214.eu-west-1.compute.amazonaws.com" uuid="59294ca2-a931-47ba-8427-13ec5636336e">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://ec2-54-155-87-214.eu-west-1.compute.amazonaws.com:5432/ d5psi0onmpaaek</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="testDiplom@localhost" uuid="4da75b73-56b1-4e62-a4e1-597ed36cfa3f">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:5432/testDiplom</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

@@ -90,7 +90,7 @@ public class TelegramMethods extends TelegramService {
                         try {
                             ticketsModel = TicketsService.getTicketInfo(message.getChatId());
                         } catch (IndexOutOfBoundsException e) {
-                            ticketsModel.setChatId(message.getChatId());
+                            ticketsModel.setChatId(UserService.getUser(message.getChatId()));
                             TicketsService.addNewTicket(ticketsModel);
                         }
                         if (!TicketsMethods.hasFullInfo(ticketsModel)) {

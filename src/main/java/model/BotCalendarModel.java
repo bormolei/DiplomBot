@@ -1,5 +1,8 @@
 package model;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -11,8 +14,10 @@ public class BotCalendarModel implements MainModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "chat_id")
-    private Long chatId;
+    @JoinColumn(name = "chat_id")
+    @ManyToOne(optional = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private User chatId;
 
     @Column(name = "date")
     private LocalDate date;
@@ -26,11 +31,11 @@ public class BotCalendarModel implements MainModel {
     @Column(name = "addupd")
     private Boolean addUpdFlag;
 
-    public Long getChatId() {
+    public User getChatId() {
         return chatId;
     }
 
-    public void setChatId(Long chatId) {
+    public void setChatId(User chatId) {
         this.chatId = chatId;
     }
 

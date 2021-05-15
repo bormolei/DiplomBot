@@ -1,5 +1,8 @@
 package model;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 
@@ -10,8 +13,10 @@ public class TicketsModel implements MainModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "user_chat_id")
-    private Long chatId;
+    @JoinColumn(name = "user_chat_id")
+    @ManyToOne(optional = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private User chatId;
 
     @Column(name = "departure_city")
     private String departureCity;
@@ -38,11 +43,11 @@ public class TicketsModel implements MainModel {
         this.arrivalCity = arrivalCity;
     }
 
-    public Long getChatId() {
+    public User getChatId() {
         return chatId;
     }
 
-    public void setChatId(Long chatId) {
+    public void setChatId(User chatId) {
         this.chatId = chatId;
     }
 
