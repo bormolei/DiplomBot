@@ -1,4 +1,4 @@
-package service.Exceptions;
+package Exceptions.Calendar;
 
 public class MonthException extends Exception {
     private int monthNumber;

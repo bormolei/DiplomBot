@@ -1,43 +1,47 @@
-package service;
+package service.Weather;
 
+import Exceptions.Calendar.MonthException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import service.Telegram.TelegramKeyboard;
 import service.Translate.Translator;
+import utils.WeatherUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class Bot implements WeatherParser {
+public class WeatherBot implements WeatherParser {
     private final static String API_CALL_TEMPLATE = "https://api.openweathermap.org/data/2.5/forecast?q=";
-    private final static String API_KEY_TEMPLATE = "&units=metric&APPID=af2ed85eb4017a81d8584d861a45f21a";
+    private final static String API_KEY_TEMPLATE = "&units=metric&cnt=40&APPID=af2ed85eb4017a81d8584d861a45f21a";
     private final static String USER_AGENT = "Mozilla/5.0";
     private final static DateTimeFormatter INPUT_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final static DateTimeFormatter OUTPUT_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("MMM-dd HH:mm", Locale.US);
-
-
-    public Bot() {
-    }
+    static List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
 
     @Override
-    public String getReadyForecast(String city) {
+    public String getReadyForecast(String city,int days) {
         String result;
         try {
             String jsonRawData = downloadJsonRawData(city);
-            List<String> linesOfForecast = convertRawDataToList(jsonRawData);
+            List<String> linesOfForecast = convertRawDataToList(jsonRawData,days);
             result = String.format("%s:%s%s", city, System.lineSeparator(), parseForecastDataFromList(linesOfForecast));
         } catch (IllegalArgumentException e) {
-            return String.format("Немогу найти город \"%s\". Попробуйте другой, например: \"Москва\" или \"Moscow\"", city);
+            return String.format("Данный город \"%s\" не найден. Или вам необходимо сменить режим", city);
         } catch (Exception e) {
             e.printStackTrace();
-            return "Серивис сейчас не работатет, пожалуйста попробуйте позже";
+            return "Сервис сейчас не работает, пожалуйста попробуйте позже";
         }
         return result;
     }
@@ -67,16 +71,62 @@ public class Bot implements WeatherParser {
         return response.toString();
     }
 
-    private static List<String> convertRawDataToList(String data) throws Exception {
+    private static List<String> convertRawDataToList(String data, int days) throws Exception {
         List<String> weatherList = new ArrayList<>();
-
         JsonNode arrNode = new ObjectMapper().readTree(data).get("list");
+        int date;
+
         if (arrNode.isArray()) {
-            for (final JsonNode objNode : arrNode) {
-                String forecastTime = objNode.get("dt_txt").toString();
-                if (forecastTime.contains("09:00") || forecastTime.contains("18:00")) {
-                    weatherList.add(objNode.toString());
-                }
+            switch (days) {
+                case 1:
+                    date = LocalDateTime.now().getDayOfMonth();
+
+                    for (final JsonNode objNode : arrNode) {
+                        String forecastTime = objNode.get("dt_txt").toString().replace("\"","");
+                        SimpleDateFormat format = new SimpleDateFormat();
+                        format.applyPattern("yyyy-MM-dd HH:mm:ss");
+                        int month = new Timestamp(format.parse(forecastTime).getTime()).toLocalDateTime().getDayOfMonth();
+
+                        if (month == date) {
+                            weatherList.add(objNode.toString());
+                        }
+                    }
+                    break;
+                case 3:
+                    for (int i = 0; i < days; i++) {
+                        date = LocalDateTime.now().plusDays(i).getDayOfMonth();
+
+                        for (final JsonNode objNode : arrNode) {
+                            String forecastTime = objNode.get("dt_txt").toString().replace("\"","");
+                            SimpleDateFormat format = new SimpleDateFormat();
+                            format.applyPattern("yyyy-MM-dd HH:mm:ss");
+                            int month = new Timestamp(format.parse(forecastTime).getTime()).toLocalDateTime().getDayOfMonth();
+                            if (month == date
+                                    && (forecastTime.contains("06:00") || forecastTime.contains("12:00") || forecastTime.contains("18:00"))) {
+                                weatherList.add(objNode.toString());
+                            }
+                        }
+                    }
+
+                    break;
+                case 5:
+                    for (int i = 0; i < days; i++) {
+                        date = LocalDateTime.now().plusDays(i).getDayOfMonth();
+
+                        for (final JsonNode objNode : arrNode) {
+                            String forecastTime = objNode.get("dt_txt").toString().replace("\"","");
+
+                            SimpleDateFormat format = new SimpleDateFormat();
+                            format.applyPattern("yyyy-MM-dd HH:mm:ss");
+                            int month = new Timestamp(format.parse(forecastTime).getTime()).toLocalDateTime().getDayOfMonth();
+
+                            if (month == date
+                                    && (forecastTime.contains("09:00") || forecastTime.contains("18:00"))) {
+                                weatherList.add(objNode.toString());
+                            }
+                        }
+                    }
+                    break;
             }
         }
         return weatherList;
@@ -123,5 +173,12 @@ public class Bot implements WeatherParser {
         String weatherIconCode = WeatherUtils.weatherIconsCodes.get(formattedDescription);
 
         return String.format("%s   %s %s %s%s", formattedDateTime, formattedTemperature, formattedDescription, weatherIconCode, System.lineSeparator());
+    }
+
+
+    public static ReplyKeyboard createHours(int day) throws MonthException {
+        TelegramKeyboard.clearKeyBoard();
+        rowList.clear();
+        return WeatherMethods.createHoursKeyBoard(rowList,day);
     }
 }
