@@ -4,11 +4,10 @@
 <!--        <property name="connection.url">jdbc:postgresql://localhost:5432/Personal_Assistant</property>-->
 <!--        <property name="connection.username">postgres</property>-->
 <!--        <property name="connection.password">oxitxmq5q2</property>-->
-        <property name="connection.url">jdbc:postgres://ptjnsnlojnpuqh:ebc67297632852d25d3cdca9aa37e39a25444c6c87eb1b1a3363d16593f45683@ec2-54-155-87-214.eu-west-1.compute.amazonaws.com:5432/d5psi0onmpaaek
+        <property name="connection.url">jdbc:postgresql://ec2-54-74-14-109.eu-west-1.compute.amazonaws.com:5432/d6mugikdb2so01
         </property>
-        <property name="connection.username">ptjnsnlojnpuqh</property>
-        <property name="connection.password">
-            ebc67297632852d25d3cdca9aa37e39a25444c6c87eb1b1a3363d16593f45683</property>
+        <property name="connection.username">xnsainrzibhyyb</property>
+        <property name="connection.password">36f1a4fc3291c9e0575a0012e5b867ee54ebff2c046391d993b83ba3fb66956e</property>
         <property name="hibernate.default_schema">public</property>
         <property name="connection.driver_class">org.postgresql.Driver</property>
         <property name="dialect">org.hibernate.dialect.PostgreSQL95Dialect</property>
