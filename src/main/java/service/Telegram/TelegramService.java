@@ -132,7 +132,7 @@ public class TelegramService {
     protected static void setNewTaskForDay(CallbackQuery callbackQuery) throws ParseException {
         Long chatId = callbackQuery.getMessage().getChatId();
         LocalDate ld = (BotCalendarDateConverter.fromStringToDate(callbackQuery.getData().split("'")[2]));
-        List<? extends MainModel> userDays = BotCalendarService.getAllUserTasksForDay(chatId);
+        List<? extends MainModel> userDays = BotCalendarService.getAllUserTasksForDay(user);
         int bcmNumber = BotCalendar.hasUserDay(userDays, ld);
         if (bcmNumber != -1) {
             bcm = (BotCalendarModel) userDays.get(bcmNumber);
@@ -163,7 +163,7 @@ public class TelegramService {
             int month = Integer.parseInt(callbackQuery.getData().split("'")[3]);
             int year = Integer.parseInt(callbackQuery.getData().split("'")[4]);
             LocalDate ld = LocalDate.of(year, month, date);
-            String tasks = getUserDay(ld, BotCalendarService.getAllUserTasksForDay(callbackQuery.getMessage().getChatId()));
+            String tasks = getUserDay(ld, BotCalendarService.getAllUserTasksForDay(user));
             editMessageText.setText(String.format("Запланированные дела на %s-%s-%s\n" + tasks, date, month, year))
                     .setReplyMarkup((InlineKeyboardMarkup) BotCalendar.taskList(date, month, year));
         } else if (callbackQuery.getData().split("'")[1].equals("add")) {
@@ -192,7 +192,7 @@ public class TelegramService {
     }
 
     protected static void ticketsCallBack(CallbackQuery callbackQuery) {
-        ticketsModel = TicketsService.getTicketInfo(callbackQuery.getMessage().getChatId());
+        ticketsModel = TicketsService.getTicketInfo(user.getId());
         if (callbackQuery.getData().split("'")[1].equals("get")) {
             String from = TicketsMain.getTicketInfo(ticketsModel.getDepartureCity());
             String to = TicketsMain.getTicketInfo(ticketsModel.getArrivalCity());

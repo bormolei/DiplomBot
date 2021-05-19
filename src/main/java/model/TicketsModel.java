@@ -13,7 +13,7 @@ public class TicketsModel implements MainModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @JoinColumn(name = "user_chat_id")
+    @JoinColumn(name = "user_chat_id", unique = true)
     @ManyToOne(optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User chatId;

@@ -62,7 +62,7 @@ public class TelegramMethods extends TelegramService {
                         }
                         break;
                     case "CALENDAR":
-                        bcm = BotCalendarMethods.readyForTask(message.getChatId());
+                        bcm = BotCalendarMethods.readyForTask(user);
                         if (bcm != null) {
                             List<String> userMessage = Arrays.asList(message.getText().split("-"));
                             try {
@@ -88,7 +88,7 @@ public class TelegramMethods extends TelegramService {
                         break;
                     case "TICKET":
                         try {
-                            ticketsModel = TicketsService.getTicketInfo(message.getChatId());
+                            ticketsModel = TicketsService.getTicketInfo(user.getId());
                         } catch (IndexOutOfBoundsException e) {
                             ticketsModel.setChatId(UserService.getUser(message.getChatId()));
                             TicketsService.addNewTicket(ticketsModel);

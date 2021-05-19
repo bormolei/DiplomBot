@@ -36,7 +36,7 @@ public class main {
     private static void test() {
         TicketsModel ticketsModel = new TicketsModel();
         try {
-            ticketsModel = TicketsService.getTicketInfo(381175043L);
+//            ticketsModel = TicketsService.getTicketInfo(381175043L);
         } catch (IndexOutOfBoundsException e) {
 //            ticketsModel.setChatId(381175043L);
             TicketsService.addNewTicket(ticketsModel);

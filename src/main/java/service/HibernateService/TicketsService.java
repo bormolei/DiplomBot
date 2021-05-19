@@ -15,8 +15,8 @@ public class TicketsService {
         HibernateController.doHibernateAction(ticketsModel, Actions.UPDATE);
     }
 
-    public static TicketsModel getTicketInfo(Long chatId) {
-        return (TicketsModel) HibernateController.getRowsByField(localTicket, "chatId", chatId).get(0);
+    public static TicketsModel getTicketInfo(Integer userChatId) {
+        return (TicketsModel) HibernateController.getRowsByField(localTicket, "chatId", userChatId).get(0);
     }
 
     public static void deleteTicket(TicketsModel ticketsModel) {
