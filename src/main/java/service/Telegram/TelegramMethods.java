@@ -10,11 +10,15 @@ import service.Calendar.BotCalendar;
 import service.Calendar.BotCalendarDateConverter;
 import service.Calendar.BotCalendarMethods;
 import service.HibernateService.BotCalendarService;
+import service.HibernateService.TicketsService;
 import service.HibernateService.UserService;
+import service.Tickets.TicketsMain;
+import service.Tickets.TicketsMethods;
 import service.Weather.WeatherBot;
 import utils.Commands;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +28,7 @@ public class TelegramMethods extends TelegramService {
     public static void sendMsg(Message message, BotTelegram botTelegram) throws TelegramApiException {
         bcm.clearFields();
         user.clearFields();
+        ticketsModel.clearFields();
         try {
             user = UserService.getUser(message.getChatId());
         } catch (IndexOutOfBoundsException e) {
@@ -41,7 +46,7 @@ public class TelegramMethods extends TelegramService {
         try {
             setButtons(sendMessage);
             if (message.hasLocation()) {
-                sendMessage.setText(weatherParser.getReadyForecast(parceGeo(message), 1))
+                sendMessage.setText(weatherParser.getReadyForecast(parseGeo(message), 1))
                         .setReplyMarkup(WeatherBot.createHours(1));
             } else if (Commands.fromString(message.getText()).isPresent()) {
                 chosenCommand(message);
@@ -57,11 +62,11 @@ public class TelegramMethods extends TelegramService {
                         }
                         break;
                     case "CALENDAR":
-                        bcm = BotCalendarMethods.readyForTask(message.getChatId());
+                        bcm = BotCalendarMethods.readyForTask(user);
                         if (bcm != null) {
                             List<String> userMessage = Arrays.asList(message.getText().split("-"));
                             try {
-                                bcm.setTime(BotCalendarDateConverter.parceTime(userMessage.get(0)));
+                                bcm.setTime(BotCalendarDateConverter.parseTime(userMessage.get(0)));
                                 String tasks = bcm.getTask();
                                 if (tasks == null) {
                                     tasks = userMessage.get(1);
@@ -80,6 +85,28 @@ public class TelegramMethods extends TelegramService {
                                 sendMessage.setText("Необходимо ввести текст для заметки");
                             }
                         }
+                        break;
+                    case "TICKET":
+                        try {
+                            ticketsModel = TicketsService.getTicketInfo(user.getId());
+                        } catch (IndexOutOfBoundsException e) {
+                            ticketsModel.setChatId(UserService.getUser(message.getChatId()));
+                            TicketsService.addNewTicket(ticketsModel);
+                        }
+                        if (!TicketsMethods.hasFullInfo(ticketsModel)) {
+                            String accuracy = TicketsMain.checkData(ticketsModel,message.getText());
+                            if (accuracy.equals("OK")) {
+                                TicketsMethods.addField(ticketsModel, message.getText());
+                                sendMessage.setText(TicketsMethods.ticketInfo(ticketsModel));
+                            } else {
+                                sendMessage.setText(accuracy);
+                            }
+                        }
+                        if (TicketsMethods.hasFullInfo(ticketsModel)) {
+                            sendMessage.setReplyMarkup(TicketsMain.getAccept());
+                        }
+//                        ticketWays = TicketsMain.getWay(message);
+//                        sendMessage.setText(ticketWays.get(0).toString()).setReplyMarkup((ReplyKeyboard) ticketWays.get(1));
                         break;
                     case "MAIN":
                         sendMessage.setText("Выберите режим");
@@ -107,6 +134,12 @@ public class TelegramMethods extends TelegramService {
                 sendMessage.setText("Выберите число")
                         .setReplyMarkup(BotCalendar.createMonth(currentMonth, LocalDate.now().getYear()));
                 break;
+            case "Транспортные билеты":
+                changeModeForUser(Commands.TICKET.toString());
+                sendMessage.setText("Напишите \"Москва Париж "
+                        + LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                        + "\" чтобы узнать о возможны вариантах путешествия.");
+                break;
             case "На главную":
                 changeModeForUser(Commands.Main.toString());
                 sendMessage.setText("Выберите режим");
@@ -117,6 +150,7 @@ public class TelegramMethods extends TelegramService {
     public static void sendMsgFromCallBack(CallbackQuery callbackQuery, BotTelegram botTelegram) throws TelegramApiException, MonthException {
         bcm.clearFields();
         user.clearFields();
+        user = UserService.getUser(callbackQuery.getMessage().getChatId());
         messageOptions(callbackQuery.getMessage());
         editMessageOptions(callbackQuery.getMessage());
         switch (callbackQuery.getData().split("'")[0]) {
@@ -125,6 +159,9 @@ public class TelegramMethods extends TelegramService {
                 break;
             case "day":
                 weatherCallBack(callbackQuery);
+                break;
+            case "Ticket":
+                ticketsCallBack(callbackQuery);
                 break;
             case "MainMenu":
                 changeModeForUser(Commands.Main.toString());

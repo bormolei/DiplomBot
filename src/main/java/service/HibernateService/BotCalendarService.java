@@ -3,6 +3,7 @@ package service.HibernateService;
 import DAO.HibernateController;
 import model.BotCalendarModel;
 import model.MainModel;
+import model.User;
 import utils.Actions;
 
 import java.util.List;
@@ -12,8 +13,8 @@ public class BotCalendarService {
         HibernateController.doHibernateAction(botCalendarModel, Actions.UPDATE);
     }
 
-    public static List<? extends MainModel> getAllUserTasksForDay(Long chatId){
-       return HibernateController.getRowsByField(new BotCalendarModel(),"chatId", chatId);
+    public static List<? extends MainModel> getAllUserTasksForDay(User user){
+       return HibernateController.getRowsByField(new BotCalendarModel(),"chatId", user.getId());
     }
 
     //Пасхалку для Вована(чотыре(4.04 4:44))

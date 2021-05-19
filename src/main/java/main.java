@@ -1,32 +1,22 @@
 import Telegram.BotTelegram;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import io.restassured.response.Response;
-import model.BotCalendarModel;
-import model.MainModel;
+import model.TicketsModel;
 import org.apache.log4j.PropertyConfigurator;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.meta.generics.BotSession;
-import service.HibernateService.BotCalendarService;
-import service.Tickets.TicketsMain;
+import service.HibernateService.TicketsService;
+import service.Tickets.TicketsMethods;
 
-import java.io.InputStreamReader;
 import java.text.ParseException;
-import java.util.*;
 
 public class main {
     static BotSession session = null;
     static BotTelegram botTelegram = null;
 
     public static void main(String[] args) throws ParseException {
-        test();
-//        startBot();
+//        test();
+        startBot();
     }
 
     private static void startBot() {
@@ -43,15 +33,14 @@ public class main {
     }
 
     //2021-03-27 11:56:13.445000
-    private static void test() throws ParseException {
-        String from = TicketsMain.getTicketInfo("Кострома");
-        String to = TicketsMain.getTicketInfo("Москва");
-        TicketsMain.getWay(from, to,"");
-        System.out.println("finish");
-//        JsonArray json = new JsonArray(response);
-//        Long l = 1123699229L;
-//        List<? extends MainModel> list = BotCalendarService.getAllUserTasksForDay(l);
-//        BotCalendarModel bcm = (BotCalendarModel) list.get(0);
-//        System.out.println(bcm.getAddUpdFlag());
+    private static void test() {
+        TicketsModel ticketsModel = new TicketsModel();
+        try {
+//            ticketsModel = TicketsService.getTicketInfo(381175043L);
+        } catch (IndexOutOfBoundsException e) {
+//            ticketsModel.setChatId(381175043L);
+            TicketsService.addNewTicket(ticketsModel);
+        }
+        System.out.println(TicketsMethods.ticketInfo(ticketsModel));
     }
 }
