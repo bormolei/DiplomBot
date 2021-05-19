@@ -10,7 +10,6 @@ import io.restassured.response.Response;
 import model.TicketsModel;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import service.Telegram.TelegramKeyboard;
 
@@ -33,11 +32,11 @@ public class TicketsMain extends TelegramKeyboard {
     static List<String> l = new ArrayList<>();
     static DateTimeFormatter formatter;
     static List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+    static JsonArray regions;
+    static JsonArray settlements;
+    static JsonObject city;
 
     public static String getTicketInfo(String findCity) {
-        JsonArray regions;
-        JsonArray settlements;
-        JsonObject city;
         for (int i = 0; i < s.size(); i++) {
             regions = s.get(i).getAsJsonObject().getAsJsonArray("regions");
             for (int j = 0; j < regions.size(); j++) {
@@ -48,12 +47,9 @@ public class TicketsMain extends TelegramKeyboard {
                     if (cityName.equals(findCity)) {
                         return city.getAsJsonObject("codes").get("yandex_code").toString().replace("\"", "");
                     }
-                    //ДОДЕЛАТЬ
                 }
 
             }
-
-
         }
         return "Данный город не найден";
     }
@@ -103,13 +99,24 @@ public class TicketsMain extends TelegramKeyboard {
             ticketsKeyboard(from, to, date, segments, recordNumber, recordNumber + 5);
         }
 
-
-        rowList.add(keyboardButtonsRow1);
-        rowList.add(keyboardButtonsRow2);
-        rowList.add(keyboardButtonsRow3);
-        rowList.add(keyboardButtonsRow4);
-        rowList.add(keyboardButtonsRow5);
-        rowList.add(changeButtonsRow);
+        if (keyboardButtonsRow1.size() != 0) {
+            rowList.add(keyboardButtonsRow1);
+        }
+        if (keyboardButtonsRow2.size() != 0) {
+            rowList.add(keyboardButtonsRow2);
+        }
+        if (keyboardButtonsRow3.size() != 0) {
+            rowList.add(keyboardButtonsRow3);
+        }
+        if (keyboardButtonsRow4.size() != 0) {
+            rowList.add(keyboardButtonsRow4);
+        }
+        if (keyboardButtonsRow5.size() != 0) {
+            rowList.add(keyboardButtonsRow5);
+        }
+        if (changeButtonsRow.size() != 0) {
+            rowList.add(changeButtonsRow);
+        }
         inlineKeyboardMarkup.setKeyboard(rowList);
         return inlineKeyboardMarkup;
     }
@@ -160,19 +167,38 @@ public class TicketsMain extends TelegramKeyboard {
         return inlineKeyboardMarkup;
     }
 
-    public static String checkData(TicketsModel ticketsModel,String data){
+    public static String checkData(TicketsModel ticketsModel, String data) {
         formatter = DateTimeFormatter.ofPattern("d-M-yyyy");
-        if(ticketsModel.getDepartureCity()==null||ticketsModel.getArrivalCity()==null){
-            if(!s.toString().contains(data)) {
-                return "Данного города нет в базе данных " + data;
+        if (ticketsModel.getDepartureCity() == null || ticketsModel.getArrivalCity() == null) {
+            if (!checkCity(data)) {
+                return "Данного города \""+ data +"\" нет в базе данных." +
+                        "\nБудьте добры введите корректное или другое наименование города";
             }
-        } else if (ticketsModel.getDepartureDate()==null ){
-            try{
-                LocalDate.parse(data,formatter);
-            }catch (DateTimeParseException exception){
+        } else if (ticketsModel.getDepartureDate() == null) {
+            try {
+                LocalDate.parse(data, formatter);
+            } catch (DateTimeParseException exception) {
                 return "Неверно введена дата отправления";
             }
         }
         return "OK";
+    }
+
+    private static boolean checkCity(String cityToFind){
+        String cityName;
+        for (int i = 0; i < s.size(); i++) {
+            regions = s.get(i).getAsJsonObject().getAsJsonArray("regions");
+            for (int j = 0; j < regions.size(); j++) {
+                settlements = regions.get(j).getAsJsonObject().getAsJsonArray("settlements");
+                for (int k = 0; k < settlements.size(); k++) {
+                    city = settlements.get(k).getAsJsonObject();
+                    cityName = city.get("title").toString().replace("\"", "");
+                    if (cityName.equals(cityToFind)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

@@ -105,11 +105,14 @@ public class TelegramService {
 
         List<KeyboardRow> keyboardRows = new ArrayList<>();
         KeyboardRow keyboardFirstRow = new KeyboardRow();
+        KeyboardRow keyboardSecondRow = new KeyboardRow();
 
         keyboardFirstRow.add(new KeyboardButton("Погода"));
         keyboardFirstRow.add(new KeyboardButton("Календарь"));
+        keyboardSecondRow.add(new KeyboardButton("Транспортные билеты"));
 
         keyboardRows.add(keyboardFirstRow);
+        keyboardRows.add(keyboardSecondRow);
         replyKeyboardMarkup.setKeyboard(keyboardRows);
     }
 
@@ -192,13 +195,19 @@ public class TelegramService {
     }
 
     protected static void ticketsCallBack(CallbackQuery callbackQuery) {
-        ticketsModel = TicketsService.getTicketInfo(user.getId());
+        ticketsModel = TicketsService.getTicketInfo(user);
         if (callbackQuery.getData().split("'")[1].equals("get")) {
             String from = TicketsMain.getTicketInfo(ticketsModel.getDepartureCity());
             String to = TicketsMain.getTicketInfo(ticketsModel.getArrivalCity());
             String date = ticketsModel.getDepartureDate().toString();
-            editMessageText.setText(ticketsModel.getInfoAboutTicket())
-                    .setReplyMarkup(TicketsMain.getRzdURI(from, to, date, 0));
+            InlineKeyboardMarkup inlineKeyboardMarkup = TicketsMain.getRzdURI(from, to, date, 0);
+            if(inlineKeyboardMarkup.getKeyboard().size()!=0){
+                editMessageText.setText(ticketsModel.getInfoAboutTicket())
+                        .setReplyMarkup(inlineKeyboardMarkup);
+            }else {
+                editMessageText.setText(ticketsModel.getInfoAboutTicket() + "\n\nПрямые маршруты по данном " +
+                        "направлению или дате отсутсвуют");
+            }
             ticketsModel.clearFieldsToDB();
             changeModeForUser(Commands.Main.toString());
         } else if(callbackQuery.getData().split("'")[1].equals("cancel")){

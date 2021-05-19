@@ -12,13 +12,11 @@ import service.Calendar.BotCalendarMethods;
 import service.HibernateService.BotCalendarService;
 import service.HibernateService.TicketsService;
 import service.HibernateService.UserService;
-import service.Tickets.TicketsMain;
 import service.Tickets.TicketsMethods;
 import service.Weather.WeatherBot;
 import utils.Commands;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
@@ -29,15 +27,19 @@ public class TelegramMethods extends TelegramService {
         bcm.clearFields();
         user.clearFields();
         ticketsModel.clearFields();
+        messageOptions(message);
         try {
             user = UserService.getUser(message.getChatId());
         } catch (IndexOutOfBoundsException e) {
-            user.setUserName(message.getChat().getFirstName() + " " + message.getChat().getLastName());
+            if(message.getChat().getLastName()!=null) {
+                user.setUserName(message.getChat().getFirstName() + " " + message.getChat().getLastName());
+            } else {
+                user.setUserName(message.getChat().getFirstName());
+            }
             user.setChatId(message.getChatId());
-            user.setMode("Main");
+            user.setMode("Greetings");
             UserService.addUser(user);
         }
-        messageOptions(message);
         writeMsg(message, botTelegram);
 
     }
@@ -53,63 +55,26 @@ public class TelegramMethods extends TelegramService {
             } else {
                 switch (user.getMode().toUpperCase()) {
                     case "WEATHER":
-                        String weatherAnswer = weatherParser.getReadyForecast(message.getText(), 1);
-                        if (weatherAnswer.contains("Сервис") || weatherAnswer.contains("режим")) {
-                            sendMessage.setText(weatherAnswer);
-                        } else {
-                            sendMessage.setText(weatherAnswer)
-                                    .setReplyMarkup(WeatherBot.createHours(1));
-                        }
+                        TelegramMsgMethods.weatherHandler(message);
                         break;
                     case "CALENDAR":
-                        bcm = BotCalendarMethods.readyForTask(user);
-                        if (bcm != null) {
-                            List<String> userMessage = Arrays.asList(message.getText().split("-"));
-                            try {
-                                bcm.setTime(BotCalendarDateConverter.parseTime(userMessage.get(0)));
-                                String tasks = bcm.getTask();
-                                if (tasks == null) {
-                                    tasks = userMessage.get(1);
-                                } else {
-                                    tasks += "\n" + userMessage.get(1);
-                                }
-                                bcm.setTask(tasks);
-                                bcm.setAddUpdFlag(false);
-                                BotCalendarService.addTask(bcm);
-                                sendMessage.setText("Ваша заметка на " + bcm.getDate()
-                                        + " " + bcm.getTime()
-                                        + " добавлена");
-                            } catch (DateTimeParseException e) {
-                                sendMessage.setText("Неверно введено время, образец для времени \"11:12\"");
-                            } catch (ArrayIndexOutOfBoundsException e) {
-                                sendMessage.setText("Необходимо ввести текст для заметки");
-                            }
-                        }
+                        TelegramMsgMethods.calendarHandler(message);
                         break;
                     case "TICKET":
-                        try {
-                            ticketsModel = TicketsService.getTicketInfo(user.getId());
-                        } catch (IndexOutOfBoundsException e) {
-                            ticketsModel.setChatId(UserService.getUser(message.getChatId()));
-                            TicketsService.addNewTicket(ticketsModel);
-                        }
-                        if (!TicketsMethods.hasFullInfo(ticketsModel)) {
-                            String accuracy = TicketsMain.checkData(ticketsModel,message.getText());
-                            if (accuracy.equals("OK")) {
-                                TicketsMethods.addField(ticketsModel, message.getText());
-                                sendMessage.setText(TicketsMethods.ticketInfo(ticketsModel));
-                            } else {
-                                sendMessage.setText(accuracy);
-                            }
-                        }
-                        if (TicketsMethods.hasFullInfo(ticketsModel)) {
-                            sendMessage.setReplyMarkup(TicketsMain.getAccept());
-                        }
-//                        ticketWays = TicketsMain.getWay(message);
-//                        sendMessage.setText(ticketWays.get(0).toString()).setReplyMarkup((ReplyKeyboard) ticketWays.get(1));
+                        TelegramMsgMethods.checkTicket(message);
+                        TelegramMsgMethods.ticketHandler(message);
                         break;
                     case "MAIN":
                         sendMessage.setText("Выберите режим");
+                        break;
+                    case "GREETINGS":
+                        changeModeForUser("MAIN");
+                        String str = "Здравствуйте, " + user.getUserName() + ", я ваш Личный помощник. " +
+                                "На данный момент я могу выполнить следующие поручения:" +
+                                "\n⛅Найти прогноз погоды по городу или вашим координатам" +
+                                "\n\uD83D\uDCC6Вести для вас календарь с заметками" +
+                                "\n\uD83D\uDE86Найти РЖД билеты";
+                        sendMessage.setText(str);
                         break;
                 }
 
@@ -136,9 +101,9 @@ public class TelegramMethods extends TelegramService {
                 break;
             case "Транспортные билеты":
                 changeModeForUser(Commands.TICKET.toString());
-                sendMessage.setText("Напишите \"Москва Париж "
-                        + LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
-                        + "\" чтобы узнать о возможны вариантах путешествия.");
+                TelegramMsgMethods.checkTicket(message);
+                ticketsModel = TicketsService.getTicketInfo(user);
+                sendMessage.setText(TicketsMethods.ticketInfo(ticketsModel));
                 break;
             case "На главную":
                 changeModeForUser(Commands.Main.toString());
