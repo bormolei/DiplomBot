@@ -14,6 +14,7 @@ import service.Weather.WeatherBot;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class TelegramMsgMethods extends TelegramService {
 
@@ -28,9 +29,10 @@ public class TelegramMsgMethods extends TelegramService {
 
     public static void ticketHandler(Message message) {
         if (!TicketsMethods.hasFullInfo(ticketsModel)) {
-            String accuracy = TicketsMain.checkData(ticketsModel, message.getText());
+            String city = message.getText().substring(0,1).toUpperCase(Locale.ROOT) + message.getText().substring(1).toLowerCase();
+            String accuracy = TicketsMain.checkData(ticketsModel, city);
             if (accuracy.equals("OK")) {
-                TicketsMethods.addField(ticketsModel, message.getText());
+                TicketsMethods.addField(ticketsModel, city);
                 sendMessage.setText(TicketsMethods.ticketInfo(ticketsModel));
             } else {
                 sendMessage.setText(accuracy);

@@ -1,9 +1,7 @@
 package service.Tickets;
 
 import com.google.common.collect.Lists;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -19,16 +17,16 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TicketsMain extends TelegramKeyboard {
     static String getAllStationsURI = "https://api.rasp.yandex.net/v3.0/stations_list/?apikey=1324d008-778c-4fca-a057-2c7ce97c7b92&lang=ru_RU&format=json";
     static JsonParser jsonParser = new JsonParser();
-    static Response response = RestAssured.given()
-            .contentType(ContentType.JSON)
-            .get(getAllStationsURI);
-    static JsonArray s = jsonParser.parse(new InputStreamReader(response.asInputStream()))
-            .getAsJsonObject().get("countries")
-            .getAsJsonArray();
+    static Response response;
+    //    static JsonArray s = jsonParser.parse(new InputStreamReader(response.asInputStream()))
+//            .getAsJsonObject().get("countries")
+//            .getAsJsonArray();
     static List<String> l = new ArrayList<>();
     static DateTimeFormatter formatter;
     static List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
@@ -37,21 +35,28 @@ public class TicketsMain extends TelegramKeyboard {
     static JsonObject city;
 
     public static String getTicketInfo(String findCity) {
-        for (int i = 0; i < s.size(); i++) {
-            regions = s.get(i).getAsJsonObject().getAsJsonArray("regions");
-            for (int j = 0; j < regions.size(); j++) {
-                settlements = regions.get(j).getAsJsonObject().getAsJsonArray("settlements");
-                for (int k = 0; k < settlements.size(); k++) {
-                    city = settlements.get(k).getAsJsonObject();
-                    String cityName = city.get("title").toString().replace("\"", "");
-                    if (cityName.equals(findCity)) {
-                        return city.getAsJsonObject("codes").get("yandex_code").toString().replace("\"", "");
-                    }
-                }
-
-            }
+        Pattern pattern = Pattern.compile("(?s)(?:.*?(?:\\\"yandex_code\\\"):\\s\\\"(.*?)\\\".*?(?:\\\"title\\\": \\\"Бермуды\\\"))?.*");
+        Matcher matcher = pattern.matcher(response.asString());
+        boolean finded = matcher.find();
+        if (finded) {
+            return matcher.group(1);
+        } else {
+            return null;
         }
-        return "Данный город не найден";
+//        for (int i = 0; i < s.size(); i++) {
+//            regions = s.get(i).getAsJsonObject().getAsJsonArray("regions");
+//            for (int j = 0; j < regions.size(); j++) {
+//                settlements = regions.get(j).getAsJsonObject().getAsJsonArray("settlements");
+//                for (int k = 0; k < settlements.size(); k++) {
+//                    city = settlements.get(k).getAsJsonObject();
+//                    String cityName = city.get("title").toString().replace("\"", "");
+//                    if (cityName.equals(findCity)) {
+//                        return city.getAsJsonObject("codes").get("yandex_code").toString().replace("\"", "");
+//                    }
+//                }
+//
+//            }
+//        }
     }
 
     public static List<Object> getWay(Message message) {
@@ -170,8 +175,8 @@ public class TicketsMain extends TelegramKeyboard {
     public static String checkData(TicketsModel ticketsModel, String data) {
         formatter = DateTimeFormatter.ofPattern("d-M-yyyy");
         if (ticketsModel.getDepartureCity() == null || ticketsModel.getArrivalCity() == null) {
-            if (!checkCity(data)) {
-                return "Данного города \""+ data +"\" нет в базе данных." +
+            if (getTicketInfo(data) == null) {
+                return "Данного города \"" + data + "\" нет в базе данных." +
                         "\nБудьте добры введите корректное или другое наименование города";
             }
         } else if (ticketsModel.getDepartureDate() == null) {
@@ -184,21 +189,9 @@ public class TicketsMain extends TelegramKeyboard {
         return "OK";
     }
 
-    private static boolean checkCity(String cityToFind){
-        String cityName;
-        for (int i = 0; i < s.size(); i++) {
-            regions = s.get(i).getAsJsonObject().getAsJsonArray("regions");
-            for (int j = 0; j < regions.size(); j++) {
-                settlements = regions.get(j).getAsJsonObject().getAsJsonArray("settlements");
-                for (int k = 0; k < settlements.size(); k++) {
-                    city = settlements.get(k).getAsJsonObject();
-                    cityName = city.get("title").toString().replace("\"", "");
-                    if (cityName.equals(cityToFind)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+    public static void getStations() {
+        response = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .get(getAllStationsURI);
     }
 }
