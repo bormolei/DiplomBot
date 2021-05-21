@@ -4,9 +4,9 @@ import Exceptions.Calendar.MonthException;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import service.Calendar.BotCalendarDateConverter;
 import service.Calendar.BotCalendarMethods;
-import service.HibernateService.BotCalendarService;
-import service.HibernateService.TicketsService;
-import service.HibernateService.UserService;
+import service.HibernateService.BotCalendarHibernateService;
+import service.HibernateService.TicketsHibernateService;
+import service.HibernateService.UserHibernateService;
 import service.Tickets.TicketsMain;
 import service.Tickets.TicketsMethods;
 import service.Weather.WeatherBot;
@@ -20,10 +20,10 @@ public class TelegramMsgMethods extends TelegramService {
 
     public static void checkTicket(Message message) {
         try {
-            ticketsModel = TicketsService.getTicketInfo(user);
+            ticketsModel = TicketsHibernateService.getTicketInfo(user);
         } catch (IndexOutOfBoundsException e) {
-            ticketsModel.setChatId(UserService.getUser(message.getChatId()));
-            TicketsService.addNewTicket(ticketsModel);
+            ticketsModel.setChatId(UserHibernateService.getUser(message.getChatId()));
+            TicketsHibernateService.addNewTicket(ticketsModel);
         }
     }
 
@@ -57,7 +57,7 @@ public class TelegramMsgMethods extends TelegramService {
                 }
                 bcm.setTask(tasks);
                 bcm.setAddUpdFlag(false);
-                BotCalendarService.addTask(bcm);
+                BotCalendarHibernateService.addTask(bcm);
                 sendMessage.setText("Ваша заметка на " + bcm.getDate()
                         + " " + bcm.getTime()
                         + " добавлена");

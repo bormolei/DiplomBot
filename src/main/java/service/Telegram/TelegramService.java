@@ -18,9 +18,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import service.Calendar.BotCalendar;
 import service.Calendar.BotCalendarDateConverter;
-import service.HibernateService.BotCalendarService;
-import service.HibernateService.TicketsService;
-import service.HibernateService.UserService;
+import service.HibernateService.BotCalendarHibernateService;
+import service.HibernateService.TicketsHibernateService;
+import service.HibernateService.UserHibernateService;
 import service.Tickets.TicketsMain;
 import service.Tickets.TicketsMethods;
 import service.Weather.WeatherBot;
@@ -44,7 +44,7 @@ public class TelegramService {
 
 
     public static String checkMode(Long chatId) {
-        return UserService.getMode(chatId);
+        return UserHibernateService.getMode(chatId);
     }
 
     protected static void messageOptions(Message message) {
@@ -62,7 +62,7 @@ public class TelegramService {
     protected static void changeModeForUser(String mode) {
         if (!(user.getMode() == null || user.getMode().equals(mode))) {
             user.setMode(mode);
-            UserService.updateUser(user);
+            UserHibernateService.updateUser(user);
         }
     }
 
@@ -135,12 +135,12 @@ public class TelegramService {
     protected static void setNewTaskForDay(CallbackQuery callbackQuery) throws ParseException {
         Long chatId = callbackQuery.getMessage().getChatId();
         LocalDate ld = (BotCalendarDateConverter.fromStringToDate(callbackQuery.getData().split("'")[2]));
-        List<? extends MainModel> userDays = BotCalendarService.getAllUserTasksForDay(user);
+        List<? extends MainModel> userDays = BotCalendarHibernateService.getAllUserTasksForDay(user);
         int bcmNumber = BotCalendar.hasUserDay(userDays, ld);
         if (bcmNumber != -1) {
             bcm = (BotCalendarModel) userDays.get(bcmNumber);
         } else {
-            bcm.setChatId(UserService.getUser(callbackQuery.getMessage().getChatId()));
+            bcm.setChatId(UserHibernateService.getUser(callbackQuery.getMessage().getChatId()));
             bcm.setDate(ld);
         }
         bcm.setAddUpdFlag(true);
@@ -166,7 +166,7 @@ public class TelegramService {
             int month = Integer.parseInt(callbackQuery.getData().split("'")[3]);
             int year = Integer.parseInt(callbackQuery.getData().split("'")[4]);
             LocalDate ld = LocalDate.of(year, month, date);
-            String tasks = getUserDay(ld, BotCalendarService.getAllUserTasksForDay(user));
+            String tasks = getUserDay(ld, BotCalendarHibernateService.getAllUserTasksForDay(user));
             editMessageText.setText(String.format("Запланированные дела на %s-%s-%s\n" + tasks, date, month, year))
                     .setReplyMarkup((InlineKeyboardMarkup) BotCalendar.taskList(date, month, year));
         } else if (callbackQuery.getData().split("'")[1].equals("add")) {
@@ -175,7 +175,7 @@ public class TelegramService {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            BotCalendarService.addPrecondition(bcm);
+            BotCalendarHibernateService.addPrecondition(bcm);
             editMessageText.setText("Укажите время для вашей заметки и текст заметки" +
                     "\nобразец \"11:12-Прогулка\"");
         } else {
@@ -195,7 +195,7 @@ public class TelegramService {
     }
 
     protected static void ticketsCallBack(CallbackQuery callbackQuery) {
-        ticketsModel = TicketsService.getTicketInfo(user);
+        ticketsModel = TicketsHibernateService.getTicketInfo(user);
         if (callbackQuery.getData().split("'")[1].equals("get")) {
             String from = TicketsMain.getTicketInfo(ticketsModel.getDepartureCity());
             String to = TicketsMain.getTicketInfo(ticketsModel.getArrivalCity());
@@ -214,7 +214,7 @@ public class TelegramService {
             ticketsModel.clearFieldsToDB();
             editMessageText.setText(TicketsMethods.ticketInfo(ticketsModel));
         }
-        TicketsService.updateTicketInfo(ticketsModel);
+        TicketsHibernateService.updateTicketInfo(ticketsModel);
     }
 
     protected static void backToMainMenu(CallbackQuery callbackQuery) {

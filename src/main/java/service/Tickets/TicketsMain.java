@@ -19,44 +19,41 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class TicketsMain extends TelegramKeyboard {
     static String getAllStationsURI = "https://api.rasp.yandex.net/v3.0/stations_list/?apikey=1324d008-778c-4fca-a057-2c7ce97c7b92&lang=ru_RU&format=json";
     static JsonParser jsonParser = new JsonParser();
-    static Response response;
-    //    static JsonArray s = jsonParser.parse(new InputStreamReader(response.asInputStream()))
-//            .getAsJsonObject().get("countries")
-//            .getAsJsonArray();
+    //    static Map<Object, Object> map = getCities();
     static List<String> l = new ArrayList<>();
     static DateTimeFormatter formatter;
     static List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+    static Response response = RestAssured.given()
+            .contentType(ContentType.JSON)
+            .get(getAllStationsURI);
+    static JsonArray s = jsonParser.parse(new InputStreamReader(response.asInputStream()))
+            .getAsJsonObject().get("countries")
+            .getAsJsonArray();
     static JsonArray regions;
     static JsonArray settlements;
     static JsonObject city;
 
     public static String getTicketInfo(String findCity) {
-        Pattern pattern = Pattern.compile("(?s)(?:.*?(?:\\\"yandex_code\\\"):\\s\\\"(.*?)\\\".*?(?:\\\"title\\\": \\\"Бермуды\\\"))?.*");
-        Matcher matcher = pattern.matcher(response.asString());
-        boolean finded = matcher.find();
-        if (finded) {
-            return matcher.group(1);
-        } else {
-            return null;
+        for (int i = 0; i < s.size(); i++) {
+            regions = s.get(i).getAsJsonObject().getAsJsonArray("regions");
+            for (int j = 0; j < regions.size(); j++) {
+                settlements = regions.get(j).getAsJsonObject().getAsJsonArray("settlements");
+                for (int k = 0; k < settlements.size(); k++) {
+                    city = settlements.get(k).getAsJsonObject();
+                    String cityName = city.get("title").toString().replace("\"", "");
+                    if (cityName.equals(findCity)) {
+                        return city.getAsJsonObject("codes").get("yandex_code").toString().replace("\"", "");
+                    }
+                }
+
+            }
         }
-//        for (int i = 0; i < s.size(); i++) {
-//            regions = s.get(i).getAsJsonObject().getAsJsonArray("regions");
-//            for (int j = 0; j < regions.size(); j++) {
-//                settlements = regions.get(j).getAsJsonObject().getAsJsonArray("settlements");
-//                for (int k = 0; k < settlements.size(); k++) {
-//                    city = settlements.get(k).getAsJsonObject();
-//                    String cityName = city.get("title").toString().replace("\"", "");
-//                    if (cityName.equals(findCity)) {
-//                        return city.getAsJsonObject("codes").get("yandex_code").toString().replace("\"", "");
-//                    }
-//                }
-//
-//            }
-//        }
+        return "Данный город не найден";
     }
 
     public static List<Object> getWay(Message message) {
@@ -175,7 +172,7 @@ public class TicketsMain extends TelegramKeyboard {
     public static String checkData(TicketsModel ticketsModel, String data) {
         formatter = DateTimeFormatter.ofPattern("d-M-yyyy");
         if (ticketsModel.getDepartureCity() == null || ticketsModel.getArrivalCity() == null) {
-            if (getTicketInfo(data) == null) {
+            if (!checkCity(data)) {
                 return "Данного города \"" + data + "\" нет в базе данных." +
                         "\nБудьте добры введите корректное или другое наименование города";
             }
@@ -189,9 +186,63 @@ public class TicketsMain extends TelegramKeyboard {
         return "OK";
     }
 
-    public static void getStations() {
-        response = RestAssured.given()
-                .contentType(ContentType.JSON)
-                .get(getAllStationsURI);
+    private static boolean checkCity(String cityName) {
+        return s.toString().contains("\"title\":\"" + cityName + "\"");
     }
+
+//    public static Map<Object, Object> getCities() {
+//        Map<Object, Object> map = new HashMap<>();
+//        String textResult = "";
+//        String text = RestAssured.given()
+//                .contentType(ContentType.JSON)
+//                .get(getAllStationsURI)
+//                .asString();
+//
+//        Matcher matcher1 = Pattern
+//                .compile("\\{\"countries\": \\[(.*)")
+//                .matcher(text);
+//
+//        if (matcher1.find()) {
+//            String t = matcher1.group(1);
+//            textResult = t.substring(0, t.length() - 2);
+//        } else {
+//            try {
+//                throw new Exception();
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        Stream<String> arr = Arrays.stream(textResult.split(",\\s+(?=\\{\\\"regions\\\":)"));
+//
+//        try {
+//            arr.forEach(str ->
+//                    new JsonParser().parse(str)
+//                            .getAsJsonObject()
+//                            .getAsJsonArray("regions")
+//                            .forEach(region ->
+//                                    region.getAsJsonObject()
+//                                            .getAsJsonArray("settlements")
+//                                            .forEach(settle -> {
+//                                                        Object yandex_code = settle.getAsJsonObject().getAsJsonObject("codes")
+//                                                                .get("yandex_code");
+//
+//                                                        Object title = settle.getAsJsonObject()
+//                                                                .get("title")
+//                                                                .getAsString().replace("\"", "");
+//
+//                                                        if (yandex_code != null && !title.equals("")) {
+//                                                            yandex_code = yandex_code.toString().replace("\"", "");
+//                                                            map.put(title, yandex_code);
+//                                                            System.out.println("Рабочая -" + map.size());
+//                                                        }
+//                                                    }
+//                                            )
+//                            )
+//            );
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return map;
+//    }
 }

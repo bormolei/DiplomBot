@@ -1,6 +1,7 @@
 package utils;
 
 import model.BotCalendarModel;
+import model.City;
 import model.TicketsModel;
 import model.User;
 import org.hibernate.SessionFactory;
@@ -19,6 +20,7 @@ public class HibernateSessionFactoryUtil {
                 configuration.addAnnotatedClass(User.class);
                 configuration.addAnnotatedClass(BotCalendarModel.class);
                 configuration.addAnnotatedClass(TicketsModel.class);
+                configuration.addAnnotatedClass(City.class);
                 StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties());
                 sessionFactory = configuration.buildSessionFactory(builder.build());
 

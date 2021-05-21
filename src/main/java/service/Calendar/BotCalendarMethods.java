@@ -6,7 +6,7 @@ import model.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import Exceptions.Calendar.MonthException;
-import service.HibernateService.BotCalendarService;
+import service.HibernateService.BotCalendarHibernateService;
 import service.Telegram.TelegramKeyboard;
 
 import java.time.LocalDate;
@@ -145,7 +145,7 @@ public class BotCalendarMethods extends TelegramKeyboard {
     }
 
     public static BotCalendarModel readyForTask(User user) {
-        List<? extends MainModel> userDays = BotCalendarService.getAllUserTasksForDay(user);
+        List<? extends MainModel> userDays = BotCalendarHibernateService.getAllUserTasksForDay(user);
         BotCalendarModel botCalendar = null;
         for (MainModel userDay : userDays) {
             botCalendar = (BotCalendarModel) userDay;

@@ -1,7 +1,7 @@
 package service.Tickets;
 
 import model.TicketsModel;
-import service.HibernateService.TicketsService;
+import service.HibernateService.TicketsHibernateService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -31,6 +31,6 @@ public class TicketsMethods {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d-M-yyyy");
             ticket.setDepartureDate(LocalDate.parse(fieldValue, formatter));
         }
-        TicketsService.updateTicketInfo(ticket);
+        TicketsHibernateService.updateTicketInfo(ticket);
     }
 }

@@ -8,7 +8,7 @@ import utils.Actions;
 
 import java.util.List;
 
-public class BotCalendarService {
+public class BotCalendarHibernateService {
     public static void addTask(BotCalendarModel botCalendarModel){
         HibernateController.doHibernateAction(botCalendarModel, Actions.UPDATE);
     }

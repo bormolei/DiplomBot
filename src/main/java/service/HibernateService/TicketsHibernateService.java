@@ -5,7 +5,7 @@ import model.TicketsModel;
 import model.User;
 import utils.Actions;
 
-public class TicketsService {
+public class TicketsHibernateService {
     static TicketsModel localTicket = new TicketsModel();
 
     public static void addNewTicket(TicketsModel ticketsModel) {

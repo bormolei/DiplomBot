@@ -7,19 +7,13 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import service.Calendar.BotCalendar;
-import service.Calendar.BotCalendarDateConverter;
-import service.Calendar.BotCalendarMethods;
-import service.HibernateService.BotCalendarService;
-import service.HibernateService.TicketsService;
-import service.HibernateService.UserService;
+import service.HibernateService.TicketsHibernateService;
+import service.HibernateService.UserHibernateService;
 import service.Tickets.TicketsMethods;
 import service.Weather.WeatherBot;
 import utils.Commands;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.Arrays;
-import java.util.List;
 
 public class TelegramMethods extends TelegramService {
 
@@ -29,7 +23,7 @@ public class TelegramMethods extends TelegramService {
         ticketsModel.clearFields();
         messageOptions(message);
         try {
-            user = UserService.getUser(message.getChatId());
+            user = UserHibernateService.getUser(message.getChatId());
         } catch (IndexOutOfBoundsException e) {
             if(message.getChat().getLastName()!=null) {
                 user.setUserName(message.getChat().getFirstName() + " " + message.getChat().getLastName());
@@ -38,7 +32,7 @@ public class TelegramMethods extends TelegramService {
             }
             user.setChatId(message.getChatId());
             user.setMode("Greetings");
-            UserService.addUser(user);
+            UserHibernateService.addUser(user);
         }
         writeMsg(message, botTelegram);
 
@@ -102,7 +96,7 @@ public class TelegramMethods extends TelegramService {
             case "Транспортные билеты":
                 changeModeForUser(Commands.TICKET.toString());
                 TelegramMsgMethods.checkTicket(message);
-                ticketsModel = TicketsService.getTicketInfo(user);
+                ticketsModel = TicketsHibernateService.getTicketInfo(user);
                 sendMessage.setText(TicketsMethods.ticketInfo(ticketsModel));
                 break;
             case "На главную":
@@ -115,7 +109,7 @@ public class TelegramMethods extends TelegramService {
     public static void sendMsgFromCallBack(CallbackQuery callbackQuery, BotTelegram botTelegram) throws TelegramApiException, MonthException {
         bcm.clearFields();
         user.clearFields();
-        user = UserService.getUser(callbackQuery.getMessage().getChatId());
+        user = UserHibernateService.getUser(callbackQuery.getMessage().getChatId());
         messageOptions(callbackQuery.getMessage());
         editMessageOptions(callbackQuery.getMessage());
         switch (callbackQuery.getData().split("'")[0]) {

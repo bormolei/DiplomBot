@@ -4,7 +4,7 @@ import DAO.HibernateController;
 import model.User;
 import utils.Actions;
 
-public class UserService {
+public class UserHibernateService {
     static User localUser = new User();
 
     public static void addUser(User user){
