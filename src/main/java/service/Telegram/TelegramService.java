@@ -6,6 +6,7 @@ import com.byteowls.jopencage.model.JOpenCageResponse;
 import com.byteowls.jopencage.model.JOpenCageReverseRequest;
 import model.BotCalendarModel;
 import model.MainModel;
+import model.TicketsModel;
 import model.User;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
@@ -17,10 +18,14 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import service.Calendar.BotCalendar;
 import service.Calendar.BotCalendarDateConverter;
-import service.HibernateService.BotCalendarService;
-import service.HibernateService.UserService;
+import service.HibernateService.BotCalendarHibernateService;
+import service.HibernateService.TicketsHibernateService;
+import service.HibernateService.UserHibernateService;
+import service.Tickets.TicketsMain;
+import service.Tickets.TicketsMethods;
 import service.Weather.WeatherBot;
 import service.Weather.WeatherParser;
+import utils.Commands;
 
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -30,14 +35,16 @@ import java.util.List;
 public class TelegramService {
     protected static BotCalendarModel bcm = new BotCalendarModel();
     protected static User user = new User();
+    protected static TicketsModel ticketsModel = new TicketsModel();
     protected static WeatherParser weatherParser = new WeatherBot();
     protected static SendMessage sendMessage;
     protected static EditMessageText editMessageText;
     protected static ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+    protected static List ticketWays = new ArrayList();
 
 
     public static String checkMode(Long chatId) {
-        return UserService.getMode(chatId);
+        return UserHibernateService.getMode(chatId);
     }
 
     protected static void messageOptions(Message message) {
@@ -55,11 +62,11 @@ public class TelegramService {
     protected static void changeModeForUser(String mode) {
         if (!(user.getMode() == null || user.getMode().equals(mode))) {
             user.setMode(mode);
-            UserService.updateUser(user);
+            UserHibernateService.updateUser(user);
         }
     }
 
-    protected static String parceGeo(Message message) {
+    protected static String parseGeo(Message message) {
         JOpenCageGeocoder jOpenCageGeocoder = new JOpenCageGeocoder("ac2f76c5d0f049db9a15d712ad3db49c");
         JOpenCageReverseRequest request = new JOpenCageReverseRequest(message.getLocation().getLatitude().doubleValue(), message.getLocation().getLongitude().doubleValue());
         request.setLanguage("ru");
@@ -67,7 +74,7 @@ public class TelegramService {
         request.setNoAnnotations(true);
         request.setMinConfidence(3);
         JOpenCageResponse response = jOpenCageGeocoder.reverse(request);
-        return response.getResults().get(0).getFormatted().split(", ")[2];
+        return response.getResults().get(0).getComponents().getCity();
     }
 
     protected static InlineKeyboardMarkup chooseAnswer(CallbackQuery callbackQuery) throws MonthException {
@@ -98,11 +105,14 @@ public class TelegramService {
 
         List<KeyboardRow> keyboardRows = new ArrayList<>();
         KeyboardRow keyboardFirstRow = new KeyboardRow();
+        KeyboardRow keyboardSecondRow = new KeyboardRow();
 
         keyboardFirstRow.add(new KeyboardButton("Погода"));
         keyboardFirstRow.add(new KeyboardButton("Календарь"));
+        keyboardSecondRow.add(new KeyboardButton("Транспортные билеты"));
 
         keyboardRows.add(keyboardFirstRow);
+        keyboardRows.add(keyboardSecondRow);
         replyKeyboardMarkup.setKeyboard(keyboardRows);
     }
 
@@ -125,12 +135,12 @@ public class TelegramService {
     protected static void setNewTaskForDay(CallbackQuery callbackQuery) throws ParseException {
         Long chatId = callbackQuery.getMessage().getChatId();
         LocalDate ld = (BotCalendarDateConverter.fromStringToDate(callbackQuery.getData().split("'")[2]));
-        List<? extends MainModel> userDays = BotCalendarService.getAllUserTasksForDay(chatId);
+        List<? extends MainModel> userDays = BotCalendarHibernateService.getAllUserTasksForDay(user);
         int bcmNumber = BotCalendar.hasUserDay(userDays, ld);
-        if(bcmNumber!=-1){
+        if (bcmNumber != -1) {
             bcm = (BotCalendarModel) userDays.get(bcmNumber);
         } else {
-            bcm.setChatId(chatId);
+            bcm.setChatId(UserHibernateService.getUser(callbackQuery.getMessage().getChatId()));
             bcm.setDate(ld);
         }
         bcm.setAddUpdFlag(true);
@@ -156,8 +166,8 @@ public class TelegramService {
             int month = Integer.parseInt(callbackQuery.getData().split("'")[3]);
             int year = Integer.parseInt(callbackQuery.getData().split("'")[4]);
             LocalDate ld = LocalDate.of(year, month, date);
-            String tasks = getUserDay(ld, BotCalendarService.getAllUserTasksForDay(callbackQuery.getMessage().getChatId()));
-            editMessageText.setText(String.format("Запланированные дела на %s-%s-%s\n"+tasks, date, month, year))
+            String tasks = getUserDay(ld, BotCalendarHibernateService.getAllUserTasksForDay(user));
+            editMessageText.setText(String.format("Запланированные дела на %s-%s-%s\n" + tasks, date, month, year))
                     .setReplyMarkup((InlineKeyboardMarkup) BotCalendar.taskList(date, month, year));
         } else if (callbackQuery.getData().split("'")[1].equals("add")) {
             try {
@@ -165,7 +175,7 @@ public class TelegramService {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            BotCalendarService.addPrecondition(bcm);
+            BotCalendarHibernateService.addPrecondition(bcm);
             editMessageText.setText("Укажите время для вашей заметки и текст заметки" +
                     "\nобразец \"11:12-Прогулка\"");
         } else {
@@ -182,6 +192,29 @@ public class TelegramService {
                     .setReplyMarkup((InlineKeyboardMarkup) WeatherBot.createHours(days));
 
         }
+    }
+
+    protected static void ticketsCallBack(CallbackQuery callbackQuery) {
+        ticketsModel = TicketsHibernateService.getTicketInfo(user);
+        if (callbackQuery.getData().split("'")[1].equals("get")) {
+            String from = TicketsMain.getTicketInfo(ticketsModel.getDepartureCity());
+            String to = TicketsMain.getTicketInfo(ticketsModel.getArrivalCity());
+            String date = ticketsModel.getDepartureDate().toString();
+            InlineKeyboardMarkup inlineKeyboardMarkup = TicketsMain.getRzdURI(from, to, date, 0);
+            if(inlineKeyboardMarkup.getKeyboard().size()!=0){
+                editMessageText.setText(ticketsModel.getInfoAboutTicket())
+                        .setReplyMarkup(inlineKeyboardMarkup);
+            }else {
+                editMessageText.setText(ticketsModel.getInfoAboutTicket() + "\n\nПрямые маршруты по данном " +
+                        "направлению или дате отсутсвуют");
+            }
+            ticketsModel.clearFieldsToDB();
+            changeModeForUser(Commands.Main.toString());
+        } else if(callbackQuery.getData().split("'")[1].equals("cancel")){
+            ticketsModel.clearFieldsToDB();
+            editMessageText.setText(TicketsMethods.ticketInfo(ticketsModel));
+        }
+        TicketsHibernateService.updateTicketInfo(ticketsModel);
     }
 
     protected static void backToMainMenu(CallbackQuery callbackQuery) {

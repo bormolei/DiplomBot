@@ -4,7 +4,8 @@ import DAO.HibernateController;
 import model.User;
 import utils.Actions;
 
-public class UserService {
+public class UserHibernateService {
+    static User localUser = new User();
 
     public static void addUser(User user){
         HibernateController.doHibernateAction(user, Actions.SAVE);
@@ -19,15 +20,15 @@ public class UserService {
     }
 
     public static boolean checkChatIdUser(Long chatId){
-        return HibernateController.getColumnByField(new User(),"chatId").contains(chatId);
+        return HibernateController.getColumnByField(localUser,"chatId").contains(chatId);
     }
 
     public static User getUser(Long chatId){
-        return (User) HibernateController.getRowsByField(new User(),"chatId",chatId).get(0);
+        return (User) HibernateController.getUserRows(localUser,"chatId",chatId).get(0);
     }
 
     public static String getMode(Long chatId){
-        User user = (User) HibernateController.getRowsByField(new User(),"chatId",chatId).get(0);
+        User user = (User) HibernateController.getUserRows(localUser,"chatId",chatId).get(0);
         return user.getMode();
     }
 }

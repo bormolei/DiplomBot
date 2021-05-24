@@ -12,7 +12,7 @@ public class BotCalendarDateConverter {
         return LocalDate.parse(from, formatter);
     }
 
-    public static LocalTime parceTime(String time){
+    public static LocalTime parseTime(String time){
         return LocalTime.parse(time);
     }
 }

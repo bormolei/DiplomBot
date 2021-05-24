@@ -2,10 +2,11 @@ package service.Calendar;
 
 import model.BotCalendarModel;
 import model.MainModel;
+import model.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import Exceptions.Calendar.MonthException;
-import service.HibernateService.BotCalendarService;
+import service.HibernateService.BotCalendarHibernateService;
 import service.Telegram.TelegramKeyboard;
 
 import java.time.LocalDate;
@@ -143,13 +144,13 @@ public class BotCalendarMethods extends TelegramKeyboard {
         return inlineKeyboardMarkup;
     }
 
-    public static BotCalendarModel readyForTask(Long chatId) {
-        List<? extends MainModel> userDays = BotCalendarService.getAllUserTasksForDay(chatId);
-        BotCalendarModel user = null;
+    public static BotCalendarModel readyForTask(User user) {
+        List<? extends MainModel> userDays = BotCalendarHibernateService.getAllUserTasksForDay(user);
+        BotCalendarModel botCalendar = null;
         for (MainModel userDay : userDays) {
-            user = (BotCalendarModel) userDay;
-            if (user.getAddUpdFlag()) {
-                return user;
+            botCalendar = (BotCalendarModel) userDay;
+            if (botCalendar.getAddUpdFlag()) {
+                return botCalendar;
             }
         }
         return null;
