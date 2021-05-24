@@ -1,14 +1,18 @@
 package service.Tickets;
 
 import com.google.common.collect.Lists;
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import model.CityModel;
 import model.TicketsModel;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import service.Cities.CitiesService;
 import service.Telegram.TelegramKeyboard;
 
 import java.io.InputStreamReader;
@@ -16,15 +20,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TicketsMain extends TelegramKeyboard {
     static String getAllStationsURI = "https://api.rasp.yandex.net/v3.0/stations_list/?apikey=1324d008-778c-4fca-a057-2c7ce97c7b92&lang=ru_RU&format=json";
     static JsonParser jsonParser = new JsonParser();
-    //    static Map<Object, Object> map = getCities();
     static List<String> l = new ArrayList<>();
     static DateTimeFormatter formatter;
     static List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
@@ -34,23 +35,13 @@ public class TicketsMain extends TelegramKeyboard {
     static JsonArray s = jsonParser.parse(new InputStreamReader(response.asInputStream()))
             .getAsJsonObject().get("countries")
             .getAsJsonArray();
-    static JsonArray regions;
-    static JsonArray settlements;
-    static JsonObject city;
+    static List listCities = CitiesService.getAllCities();
 
     public static String getTicketInfo(String findCity) {
-        for (int i = 0; i < s.size(); i++) {
-            regions = s.get(i).getAsJsonObject().getAsJsonArray("regions");
-            for (int j = 0; j < regions.size(); j++) {
-                settlements = regions.get(j).getAsJsonObject().getAsJsonArray("settlements");
-                for (int k = 0; k < settlements.size(); k++) {
-                    city = settlements.get(k).getAsJsonObject();
-                    String cityName = city.get("title").toString().replace("\"", "");
-                    if (cityName.equals(findCity)) {
-                        return city.getAsJsonObject("codes").get("yandex_code").toString().replace("\"", "");
-                    }
-                }
-
+        for (Object listCity : listCities) {
+            CityModel city = (CityModel) listCity;
+            if (city.getCityName().equals(findCity)) {
+                return city.getCityCode();
             }
         }
         return "Данный город не найден";
@@ -189,60 +180,4 @@ public class TicketsMain extends TelegramKeyboard {
     private static boolean checkCity(String cityName) {
         return s.toString().contains("\"title\":\"" + cityName + "\"");
     }
-
-//    public static Map<Object, Object> getCities() {
-//        Map<Object, Object> map = new HashMap<>();
-//        String textResult = "";
-//        String text = RestAssured.given()
-//                .contentType(ContentType.JSON)
-//                .get(getAllStationsURI)
-//                .asString();
-//
-//        Matcher matcher1 = Pattern
-//                .compile("\\{\"countries\": \\[(.*)")
-//                .matcher(text);
-//
-//        if (matcher1.find()) {
-//            String t = matcher1.group(1);
-//            textResult = t.substring(0, t.length() - 2);
-//        } else {
-//            try {
-//                throw new Exception();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//
-//        Stream<String> arr = Arrays.stream(textResult.split(",\\s+(?=\\{\\\"regions\\\":)"));
-//
-//        try {
-//            arr.forEach(str ->
-//                    new JsonParser().parse(str)
-//                            .getAsJsonObject()
-//                            .getAsJsonArray("regions")
-//                            .forEach(region ->
-//                                    region.getAsJsonObject()
-//                                            .getAsJsonArray("settlements")
-//                                            .forEach(settle -> {
-//                                                        Object yandex_code = settle.getAsJsonObject().getAsJsonObject("codes")
-//                                                                .get("yandex_code");
-//
-//                                                        Object title = settle.getAsJsonObject()
-//                                                                .get("title")
-//                                                                .getAsString().replace("\"", "");
-//
-//                                                        if (yandex_code != null && !title.equals("")) {
-//                                                            yandex_code = yandex_code.toString().replace("\"", "");
-//                                                            map.put(title, yandex_code);
-//                                                            System.out.println("Рабочая -" + map.size());
-//                                                        }
-//                                                    }
-//                                            )
-//                            )
-//            );
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return map;
-//    }
 }

@@ -33,7 +33,7 @@ public class HibernateController {
         }
     }
 
-    public static List allUsers(MainModel mainModel) {
+    public static List getAllRows(MainModel mainModel) {
         try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
             CriteriaQuery criteria = session.getCriteriaBuilder().createQuery(mainModel.getClass());
             criteria.from(mainModel.getClass());

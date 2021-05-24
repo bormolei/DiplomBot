@@ -12,7 +12,7 @@ public class User implements MainModel {
     @Column(name = "user_name")
     private String userName;
 
-    @Column(name = "chat_id")
+    @Column(name = "chat_id", unique = true)
     private Long chatId;
 
     @Column(name = "mode")

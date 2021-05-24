@@ -4,16 +4,19 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "cities")
-public class City implements MainModel {
+public class CityModel implements MainModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "city_name")
+    @Column(name = "city_name", unique = true)
     private String cityName;
 
-    @Column(name = "city_code")
-    private Long cityCode;
+    @Column(name = "city_code", unique = true)
+    private String cityCode;
+
+    @Column(name = "country")
+    private String country;
 
     public Integer getId() {
         return id;
@@ -27,17 +30,26 @@ public class City implements MainModel {
         this.cityName = cityName;
     }
 
-    public Long getCityCode() {
+    public String getCityCode() {
         return cityCode;
     }
 
-    public void setCityCode(Long cityCode) {
+    public void setCityCode(String cityCode) {
         this.cityCode = cityCode;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 
     public void clearFields() {
         id = null;
-        cityName = null;
         cityCode = null;
+        cityName = null;
+        country = null;
     }
 }

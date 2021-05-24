@@ -25,7 +25,7 @@ public class TelegramMethods extends TelegramService {
         try {
             user = UserHibernateService.getUser(message.getChatId());
         } catch (IndexOutOfBoundsException e) {
-            if(message.getChat().getLastName()!=null) {
+            if (message.getChat().getLastName() != null) {
                 user.setUserName(message.getChat().getFirstName() + " " + message.getChat().getLastName());
             } else {
                 user.setUserName(message.getChat().getFirstName());
@@ -98,6 +98,9 @@ public class TelegramMethods extends TelegramService {
                 TelegramMsgMethods.checkTicket(message);
                 ticketsModel = TicketsHibernateService.getTicketInfo(user);
                 sendMessage.setText(TicketsMethods.ticketInfo(ticketsModel));
+                if (TicketsMethods.hasFullInfo(ticketsModel)) {
+                    TelegramMsgMethods.ticketHandler(message);
+                }
                 break;
             case "На главную":
                 changeModeForUser(Commands.Main.toString());
