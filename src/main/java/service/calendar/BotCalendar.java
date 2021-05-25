@@ -1,4 +1,4 @@
-package service.Calendar;
+package service.calendar;
 
 import model.BotCalendarModel;
 import model.MainModel;

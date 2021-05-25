@@ -1,12 +1,12 @@
-package service.Weather;
+package service.weather;
 
 import Exceptions.Calendar.MonthException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import service.Telegram.TelegramKeyboard;
-import service.Translate.Translator;
+import service.telegram.TelegramKeyboard;
+import service.translate.Translator;
 import utils.WeatherUtils;
 
 import java.io.BufferedReader;

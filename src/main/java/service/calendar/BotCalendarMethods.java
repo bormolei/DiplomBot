@@ -1,4 +1,4 @@
-package service.Calendar;
+package service.calendar;
 
 import model.BotCalendarModel;
 import model.MainModel;
@@ -6,8 +6,8 @@ import model.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import Exceptions.Calendar.MonthException;
-import service.HibernateService.BotCalendarHibernateService;
-import service.Telegram.TelegramKeyboard;
+import service.hibernateService.BotCalendarHibernateService;
+import service.telegram.TelegramKeyboard;
 
 import java.time.LocalDate;
 import java.time.Month;

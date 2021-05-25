@@ -1,22 +1,22 @@
-package service.Telegram;
+package service.telegram;
 
 import Exceptions.Calendar.MonthException;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import service.Calendar.BotCalendarDateConverter;
-import service.Calendar.BotCalendarMethods;
-import service.HibernateService.BotCalendarHibernateService;
-import service.HibernateService.TicketsHibernateService;
-import service.HibernateService.UserHibernateService;
-import service.Tickets.TicketsMain;
-import service.Tickets.TicketsMethods;
-import service.Weather.WeatherBot;
+import service.calendar.BotCalendarDateConverter;
+import service.calendar.BotCalendarMethods;
+import service.hibernateService.BotCalendarHibernateService;
+import service.hibernateService.TicketsHibernateService;
+import service.hibernateService.UserHibernateService;
+import service.tickets.TicketsMain;
+import service.tickets.TicketsMethods;
+import service.weather.WeatherBot;
 
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-public class TelegramMsgMethods extends TelegramService {
+public class TelegramMsgMethods extends TelegramMethods {
 
     public static void checkTicket(Message message) {
         try {

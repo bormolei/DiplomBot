@@ -1,4 +1,4 @@
-package service.Cities;
+package service.cities;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -8,7 +8,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import model.CityModel;
 import org.hibernate.exception.ConstraintViolationException;
-import service.HibernateService.CitiesHibernateService;
+import service.hibernateService.CitiesHibernateService;
 
 import java.io.InputStreamReader;
 import java.util.ArrayList;

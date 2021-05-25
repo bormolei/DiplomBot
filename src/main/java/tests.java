@@ -1,21 +1,12 @@
-import Telegram.BotTelegram;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import io.restassured.response.Response;
+import telegram.BotTelegram;
 import model.CityModel;
 import org.apache.log4j.PropertyConfigurator;
-import org.hibernate.exception.ConstraintViolationException;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.meta.generics.BotSession;
-import service.Cities.CitiesService;
+import service.cities.CitiesService;
 
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
 
 public class tests {
@@ -29,7 +20,8 @@ public class tests {
     }
 
     private static void startBot() throws Exception {
-        PropertyConfigurator.configure(System.getProperty("user.dir") + "/src/main/resources/log4j.properties");
+//        PropertyConfigurator.configure(System.getProperty("user.dir") + "/src/main/resources/log4j.properties");
+        PropertyConfigurator.configure(tests.class.getClassLoader().getResource("log4j.properties"));
         ApiContextInitializer.init();
         botTelegram = new BotTelegram("@KomarTester_bot", "1849882964:AAFau5iv6y880gJ7a8lJ2r8uJ92o6EKf6Hw");
         TelegramBotsApi botsApi = new TelegramBotsApi();

@@ -1,4 +1,4 @@
-package service.Calendar;
+package service.calendar;
 
 import java.text.ParseException;
 import java.time.LocalDate;

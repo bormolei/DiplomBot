@@ -1,4 +1,4 @@
-package service.Tickets;
+package service.tickets;
 
 import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
@@ -12,8 +12,8 @@ import model.TicketsModel;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import service.Cities.CitiesService;
-import service.Telegram.TelegramKeyboard;
+import service.cities.CitiesService;
+import service.telegram.TelegramKeyboard;
 
 import java.io.InputStreamReader;
 import java.time.LocalDate;

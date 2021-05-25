@@ -1,19 +1,24 @@
-package service.Telegram;
+package service.telegram;
 
 import Exceptions.Calendar.MonthException;
-import Telegram.BotTelegram;
+import io.restassured.RestAssured;
+import model.FileStorageModel;
+import service.fileStorage.FileKeyboard;
+import service.fileStorage.FileStorageMethods;
+import telegram.BotTelegram;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
-import service.Calendar.BotCalendar;
-import service.HibernateService.TicketsHibernateService;
-import service.HibernateService.UserHibernateService;
-import service.Tickets.TicketsMethods;
-import service.Weather.WeatherBot;
+import service.calendar.BotCalendar;
+import service.hibernateService.TicketsHibernateService;
+import service.hibernateService.UserHibernateService;
+import service.tickets.TicketsMethods;
+import service.weather.WeatherBot;
 import utils.Commands;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class TelegramMethods extends TelegramService {
 
@@ -21,7 +26,9 @@ public class TelegramMethods extends TelegramService {
         bcm.clearFields();
         user.clearFields();
         ticketsModel.clearFields();
+        fileStorageModel.clearFields();
         messageOptions(message);
+        documentOptions(message);
         try {
             user = UserHibernateService.getUser(message.getChatId());
         } catch (IndexOutOfBoundsException e) {
@@ -44,6 +51,10 @@ public class TelegramMethods extends TelegramService {
             if (message.hasLocation()) {
                 sendMessage.setText(weatherParser.getReadyForecast(parseGeo(message), 1))
                         .setReplyMarkup(WeatherBot.createHours(1));
+            } else if (message.hasDocument()) {
+                FileStorageMethods.saveFile(message, botTelegram);
+            } else if (message.hasPhoto()) {
+                sendMessage.setText("Будьте добры, отправьте ваш файл в виде документа");
             } else if (Commands.fromString(message.getText()).isPresent()) {
                 chosenCommand(message);
             } else {
@@ -102,6 +113,14 @@ public class TelegramMethods extends TelegramService {
                     TelegramMsgMethods.ticketHandler(message);
                 }
                 break;
+            case "Мои файлы":
+                List<FileStorageModel> fileNameList = FileStorageMethods.getFileFromDB(message);
+//                StringBuilder fileNameArray = new StringBuilder();
+//                for (String str: fileNameList) {
+//                    fileNameArray.append("\n").append(str);
+//                }
+                sendMessage.setText("Список ваших файлов:").setReplyMarkup(FileKeyboard.createFileKeyboard(fileNameList));
+                break;
             case "На главную":
                 changeModeForUser(Commands.Main.toString());
                 sendMessage.setText("Выберите режим");
@@ -115,6 +134,7 @@ public class TelegramMethods extends TelegramService {
         user = UserHibernateService.getUser(callbackQuery.getMessage().getChatId());
         messageOptions(callbackQuery.getMessage());
         editMessageOptions(callbackQuery.getMessage());
+        documentOptions(callbackQuery.getMessage());
         switch (callbackQuery.getData().split("'")[0]) {
             case "Calendar":
                 calendarCallBack(callbackQuery);
@@ -124,6 +144,10 @@ public class TelegramMethods extends TelegramService {
                 break;
             case "Ticket":
                 ticketsCallBack(callbackQuery);
+                break;
+            case "File":
+                FileStorageMethods.downloadFile(Integer.parseInt(callbackQuery.getData().split("'")[1]));
+                botTelegram.execute(document);
                 break;
             case "MainMenu":
                 changeModeForUser(Commands.Main.toString());
@@ -138,6 +162,13 @@ public class TelegramMethods extends TelegramService {
         } catch (TelegramApiRequestException e) {
             e.printStackTrace();
         }
+    }
+
+    public static byte[] getFile(String botToken, String fileId) {
+        String query = baseUri + "/file/bot" + botToken + "/" + getFilePath(botToken, fileId);
+        return RestAssured.given()
+                .get(query)
+                .asByteArray();
     }
 
 

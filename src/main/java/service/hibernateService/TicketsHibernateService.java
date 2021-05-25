@@ -1,4 +1,4 @@
-package service.HibernateService;
+package service.hibernateService;
 
 import DAO.HibernateController;
 import model.TicketsModel;

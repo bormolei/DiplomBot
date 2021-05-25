@@ -1,8 +1,8 @@
-package service.Weather;
+package service.weather;
 
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import service.Telegram.TelegramKeyboard;
+import service.telegram.TelegramKeyboard;
 
 import java.util.List;
 

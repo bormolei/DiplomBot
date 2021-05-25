@@ -1,30 +1,31 @@
-package service.Telegram;
+package service.telegram;
 
 import Exceptions.Calendar.MonthException;
 import com.byteowls.jopencage.JOpenCageGeocoder;
 import com.byteowls.jopencage.model.JOpenCageResponse;
 import com.byteowls.jopencage.model.JOpenCageReverseRequest;
-import model.BotCalendarModel;
-import model.MainModel;
-import model.TicketsModel;
-import model.User;
+import io.restassured.RestAssured;
+import model.*;
+import org.json.JSONObject;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
-import service.Calendar.BotCalendar;
-import service.Calendar.BotCalendarDateConverter;
-import service.HibernateService.BotCalendarHibernateService;
-import service.HibernateService.TicketsHibernateService;
-import service.HibernateService.UserHibernateService;
-import service.Tickets.TicketsMain;
-import service.Tickets.TicketsMethods;
-import service.Weather.WeatherBot;
-import service.Weather.WeatherParser;
+import service.calendar.BotCalendar;
+import service.calendar.BotCalendarDateConverter;
+import service.hibernateService.BotCalendarHibernateService;
+import service.hibernateService.TicketsHibernateService;
+import service.hibernateService.UserHibernateService;
+import service.tickets.TicketsMain;
+import service.tickets.TicketsMethods;
+import service.weather.WeatherBot;
+import service.weather.WeatherParser;
 import utils.Commands;
 
 import java.text.ParseException;
@@ -36,11 +37,13 @@ public class TelegramService {
     protected static BotCalendarModel bcm = new BotCalendarModel();
     protected static User user = new User();
     protected static TicketsModel ticketsModel = new TicketsModel();
+    protected static FileStorageModel fileStorageModel = new FileStorageModel();
     protected static WeatherParser weatherParser = new WeatherBot();
     protected static SendMessage sendMessage;
     protected static EditMessageText editMessageText;
+    protected static SendDocument document;
     protected static ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-    protected static List ticketWays = new ArrayList();
+    static final String baseUri = "https://api.telegram.org";
 
 
     public static String checkMode(Long chatId) {
@@ -57,6 +60,11 @@ public class TelegramService {
         editMessageText = new EditMessageText();
         editMessageText.setChatId(message.getChatId());
         editMessageText.setMessageId(message.getMessageId());
+    }
+
+    protected static void documentOptions(Message message) {
+        document = new SendDocument();
+        document.setChatId(message.getChatId());
     }
 
     protected static void changeModeForUser(String mode) {
@@ -201,16 +209,16 @@ public class TelegramService {
             String to = TicketsMain.getTicketInfo(ticketsModel.getArrivalCity());
             String date = ticketsModel.getDepartureDate().toString();
             InlineKeyboardMarkup inlineKeyboardMarkup = TicketsMain.getRzdURI(from, to, date, 0);
-            if(inlineKeyboardMarkup.getKeyboard().size()!=0){
+            if (inlineKeyboardMarkup.getKeyboard().size() != 0) {
                 editMessageText.setText(ticketsModel.getInfoAboutTicket())
                         .setReplyMarkup(inlineKeyboardMarkup);
-            }else {
+            } else {
                 editMessageText.setText(ticketsModel.getInfoAboutTicket() + "\n\nПрямые маршруты по данном " +
                         "направлению или дате отсутсвуют");
             }
             ticketsModel.clearFieldsToDB();
             changeModeForUser(Commands.Main.toString());
-        } else if(callbackQuery.getData().split("'")[1].equals("cancel")){
+        } else if (callbackQuery.getData().split("'")[1].equals("cancel")) {
             ticketsModel.clearFieldsToDB();
             editMessageText.setText(TicketsMethods.ticketInfo(ticketsModel));
         }
@@ -220,5 +228,18 @@ public class TelegramService {
     protected static void backToMainMenu(CallbackQuery callbackQuery) {
         setButtons(sendMessage);
         sendMessage.setText("Выберите режим");
+    }
+
+    protected static String getFilePath(String botToken, String fileId) {
+        String query = baseUri + "/bot" + botToken + "/getFile?file_id=" + fileId;
+
+        String response = RestAssured.given()
+                .get(query)
+                .getBody()
+                .asString();
+
+        return new JSONObject(response)
+                .getJSONObject("result")
+                .getString("file_path");
     }
 }

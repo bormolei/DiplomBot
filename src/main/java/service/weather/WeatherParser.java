@@ -1,4 +1,4 @@
-package service.Weather;
+package service.weather;
 
 public interface WeatherParser {
 

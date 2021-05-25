@@ -1,4 +1,4 @@
-package service.Translate;
+package service.translate;
 
 import com.google.gson.JsonParser;
 import io.restassured.RestAssured;

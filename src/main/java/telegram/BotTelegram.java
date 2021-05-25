@@ -1,11 +1,11 @@
-package Telegram;
+package telegram;
 
 import Exceptions.Calendar.MonthException;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import service.Telegram.TelegramMethods;
+import service.telegram.TelegramMethods;
 
 public class BotTelegram extends TelegramLongPollingBot {
 
@@ -20,7 +20,7 @@ public class BotTelegram extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         Message message = update.getMessage();
-        if (message != null && (message.hasText() || message.hasLocation())) {
+        if (message != null && (message.hasText() || message.hasLocation() || message.hasDocument() || message.hasPhoto())) {
             try {
                 TelegramMethods.sendMsg(message, this);
             } catch (TelegramApiException e) {

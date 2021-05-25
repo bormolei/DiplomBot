@@ -1,7 +1,7 @@
-package service.Tickets;
+package service.tickets;
 
 import model.TicketsModel;
-import service.HibernateService.TicketsHibernateService;
+import service.hibernateService.TicketsHibernateService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
