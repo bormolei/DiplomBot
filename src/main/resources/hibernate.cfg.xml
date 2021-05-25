@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <hibernate-configuration xmlns="http://www.hibernate.org/xsd/orm/cfg">
     <session-factory>
-<!--        <property name="connection.url">jdbc:postgresql://localhost:5432/Personal_Assistant</property>-->
-<!--        <property name="connection.username">postgres</property>-->
-<!--        <property name="connection.password">oxitxmq5q2</property>-->
-        <property name="connection.url">jdbc:postgresql://ec2-54-74-14-109.eu-west-1.compute.amazonaws.com:5432/d6mugikdb2so01
-        </property>
-        <property name="connection.username">xnsainrzibhyyb</property>
-        <property name="connection.password">36f1a4fc3291c9e0575a0012e5b867ee54ebff2c046391d993b83ba3fb66956e</property>
+        <property name="connection.url">jdbc:postgresql://localhost:5432/Personal_Assistant</property>
+        <property name="connection.username">postgres</property>
+        <property name="connection.password">oxitxmq5q2</property>
+<!--        <property name="connection.url">jdbc:postgresql://ec2-54-74-14-109.eu-west-1.compute.amazonaws.com:5432/d6mugikdb2so01-->
+<!--        </property>-->
+<!--        <property name="connection.username">xnsainrzibhyyb</property>-->
+<!--        <property name="connection.password">36f1a4fc3291c9e0575a0012e5b867ee54ebff2c046391d993b83ba3fb66956e</property>-->
         <property name="hibernate.default_schema">public</property>
         <property name="connection.driver_class">org.postgresql.Driver</property>
         <property name="dialect">org.hibernate.dialect.PostgreSQL95Dialect</property>
