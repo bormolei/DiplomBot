@@ -3,6 +3,7 @@ package service.telegram;
 import Exceptions.Calendar.MonthException;
 import io.restassured.RestAssured;
 import model.FileStorageModel;
+import service.exchangeRates.ExchangeRates;
 import service.fileStorage.FileKeyboard;
 import service.fileStorage.FileStorageMethods;
 import telegram.BotTelegram;
@@ -72,6 +73,9 @@ public class TelegramMethods extends TelegramService {
                     case "MAIN":
                         sendMessage.setText("Выберите режим");
                         break;
+                    case "EXCHANGERATES":
+                        TelegramMsgMethods.exchangeRates(message);
+                        break;
                     case "GREETINGS":
                         changeModeForUser("MAIN");
                         String str = "Здравствуйте, " + user.getUserName() + ", я ваш Личный помощник. " +
@@ -115,11 +119,11 @@ public class TelegramMethods extends TelegramService {
                 break;
             case "Мои файлы":
                 List<FileStorageModel> fileNameList = FileStorageMethods.getFileFromDB(message);
-//                StringBuilder fileNameArray = new StringBuilder();
-//                for (String str: fileNameList) {
-//                    fileNameArray.append("\n").append(str);
-//                }
                 sendMessage.setText("Список ваших файлов:").setReplyMarkup(FileKeyboard.createFileKeyboard(fileNameList));
+                break;
+            case "Курс валют":
+                changeModeForUser(Commands.EXCHANGERATES.toString());
+                sendMessage.setText("Введите значение которое необходимо конвертировать");
                 break;
             case "На главную":
                 changeModeForUser(Commands.Main.toString());
@@ -149,13 +153,23 @@ public class TelegramMethods extends TelegramService {
                 FileStorageMethods.downloadFile(Integer.parseInt(callbackQuery.getData().split("'")[1]));
                 botTelegram.execute(document);
                 break;
+            case "Rates":
+                String result = ExchangeRates.convert(callbackQuery);
+                if (result != null) {
+                    editMessageText.setText(result);
+                } else {
+                    editMessageText.setText("Данное число нельзя сконвертировать");
+                }
+                break;
             case "MainMenu":
                 changeModeForUser(Commands.Main.toString());
                 backToMainMenu(callbackQuery);
-                botTelegram.execute(sendMessage);
                 break;
         }
         try {
+            if(sendMessage.getText()!=null){
+                botTelegram.execute(sendMessage);
+            }
             if (!callbackQuery.getData().split("'")[0].equals(" ") && editMessageText.getText() != null) {
                 botTelegram.execute(editMessageText);
             }

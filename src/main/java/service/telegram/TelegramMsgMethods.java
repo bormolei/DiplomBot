@@ -4,6 +4,7 @@ import Exceptions.Calendar.MonthException;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import service.calendar.BotCalendarDateConverter;
 import service.calendar.BotCalendarMethods;
+import service.exchangeRates.ExchangeRates;
 import service.hibernateService.BotCalendarHibernateService;
 import service.hibernateService.TicketsHibernateService;
 import service.hibernateService.UserHibernateService;
@@ -29,7 +30,7 @@ public class TelegramMsgMethods extends TelegramMethods {
 
     public static void ticketHandler(Message message) {
         if (!TicketsMethods.hasFullInfo(ticketsModel)) {
-            String city = message.getText().substring(0,1).toUpperCase(Locale.ROOT) + message.getText().substring(1).toLowerCase();
+            String city = message.getText().substring(0, 1).toUpperCase(Locale.ROOT) + message.getText().substring(1).toLowerCase();
             String accuracy = TicketsMain.checkData(ticketsModel, city);
             if (accuracy.equals("OK")) {
                 TicketsMethods.addField(ticketsModel, city);
@@ -43,7 +44,18 @@ public class TelegramMsgMethods extends TelegramMethods {
         }
     }
 
-    public static void calendarHandler(Message message){
+    public static void exchangeRates(Message message) {
+        try {
+
+            Double amount = Double.parseDouble(message.getText().replace(",","."));
+            sendMessage.setText("Укажите к какой валюте произвести расчет")
+                    .setReplyMarkup(ExchangeRates.setCurries(amount));
+        } catch (NumberFormatException e){
+            sendMessage.setText("Не корректное значение");
+        }
+    }
+
+    public static void calendarHandler(Message message) {
         bcm = BotCalendarMethods.readyForTask(user);
         if (bcm != null) {
             List<String> userMessage = Arrays.asList(message.getText().split("-"));

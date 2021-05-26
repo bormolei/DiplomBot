@@ -118,6 +118,7 @@ public class TelegramService {
         keyboardFirstRow.add(new KeyboardButton("Погода"));
         keyboardFirstRow.add(new KeyboardButton("Календарь"));
         keyboardSecondRow.add(new KeyboardButton("Транспортные билеты"));
+        keyboardSecondRow.add(new KeyboardButton("Мои файлы"));
 
         keyboardRows.add(keyboardFirstRow);
         keyboardRows.add(keyboardSecondRow);

@@ -8,6 +8,7 @@ public enum Commands {
     CALENDAR("Календарь"),
     Main("На главную"),
     MYFILES("Мои файлы"),
+    EXCHANGERATES("Курс валют"),
     TICKET("Транспортные билеты");
 
     private final String  value;
