@@ -114,14 +114,17 @@ public class TelegramService {
         List<KeyboardRow> keyboardRows = new ArrayList<>();
         KeyboardRow keyboardFirstRow = new KeyboardRow();
         KeyboardRow keyboardSecondRow = new KeyboardRow();
+        KeyboardRow keyboardThirdRow = new KeyboardRow();
 
         keyboardFirstRow.add(new KeyboardButton("Погода"));
         keyboardFirstRow.add(new KeyboardButton("Календарь"));
         keyboardSecondRow.add(new KeyboardButton("Транспортные билеты"));
         keyboardSecondRow.add(new KeyboardButton("Мои файлы"));
+        keyboardThirdRow.add(new KeyboardButton("Курс валют"));
 
         keyboardRows.add(keyboardFirstRow);
         keyboardRows.add(keyboardSecondRow);
+        keyboardRows.add(keyboardThirdRow);
         replyKeyboardMarkup.setKeyboard(keyboardRows);
     }
 

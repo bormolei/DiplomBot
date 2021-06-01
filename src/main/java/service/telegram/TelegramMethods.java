@@ -3,6 +3,7 @@ package service.telegram;
 import Exceptions.Calendar.MonthException;
 import io.restassured.RestAssured;
 import model.FileStorageModel;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import service.exchangeRates.ExchangeRates;
 import service.fileStorage.FileKeyboard;
 import service.fileStorage.FileStorageMethods;
@@ -80,9 +81,11 @@ public class TelegramMethods extends TelegramService {
                         changeModeForUser("MAIN");
                         String str = "Здравствуйте, " + user.getUserName() + ", я ваш Личный помощник. " +
                                 "На данный момент я могу выполнить следующие поручения:" +
-                                "\n⛅Найти прогноз погоды по городу или вашим координатам" +
-                                "\n\uD83D\uDCC6Вести для вас календарь с заметками" +
-                                "\n\uD83D\uDE86Найти РЖД билеты";
+                                "\n⛅Найти прогноз погоды по городу или вашим координатам." +
+                                "\n\uD83D\uDCC6Вести для вас календарь с заметками." +
+                                "\n\uD83D\uDCC2Хранилище файлов." +
+                                "\n\uD83D\uDE86Найти РЖД билеты." +
+                                "\n\uD83D\uDCB5Курс и конвертер валюты.";
                         sendMessage.setText(str);
                         break;
                 }
@@ -156,7 +159,10 @@ public class TelegramMethods extends TelegramService {
             case "Rates":
                 String result = ExchangeRates.convert(callbackQuery);
                 if (result != null) {
-                    editMessageText.setText(result);
+                    editMessageText.setText(result)
+                            .setReplyMarkup((InlineKeyboardMarkup) ExchangeRates
+                                    .setCurries(Double
+                                            .parseDouble(callbackQuery.getData().split("'")[2])));
                 } else {
                     editMessageText.setText("Данное число нельзя сконвертировать");
                 }
@@ -167,7 +173,7 @@ public class TelegramMethods extends TelegramService {
                 break;
         }
         try {
-            if(sendMessage.getText()!=null){
+            if (sendMessage.getText() != null) {
                 botTelegram.execute(sendMessage);
             }
             if (!callbackQuery.getData().split("'")[0].equals(" ") && editMessageText.getText() != null) {

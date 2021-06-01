@@ -89,6 +89,10 @@ public class TicketsMain extends TelegramKeyboard {
         if (segments.size() < 6) {
             ticketsKeyboard(from, to, date, segments, recordNumber, segments.size());
         } else {
+//            changeButtonsRow.add(new InlineKeyboardButton().setText("<")
+//                    .setCallbackData("Ticket'changeTicket'previous'"+previousPage));
+//            changeButtonsRow.add(new InlineKeyboardButton().setText(">")
+//                    .setCallbackData("Ticket'changeTicket'previous'"+nextPage));
             ticketsKeyboard(from, to, date, segments, recordNumber, recordNumber + 5);
         }
 

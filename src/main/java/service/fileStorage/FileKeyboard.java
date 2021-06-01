@@ -12,6 +12,7 @@ public class FileKeyboard extends TelegramKeyboard {
     static List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
     public static ReplyKeyboard createFileKeyboard(List<FileStorageModel> fileNames){
         rowList.clear();
+        TelegramKeyboard.clearKeyBoard();
         for (int i = 0; i < fileNames.size(); i++) {
             FileStorageModel fileStorageModel = fileNames.get(i);
             if(i<2){

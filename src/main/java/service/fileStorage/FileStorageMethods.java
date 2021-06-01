@@ -24,9 +24,9 @@ public class FileStorageMethods extends TelegramMethods {
         fileStorageModel.setFileName(message.getDocument().getFileName());
         try {
             FileStorageHibernateService.addNewFile(fileStorageModel);
-            sendMessage.setText("Ваш файл добавлен");
+            sendMessage.setText("✅Ваш файл добавлен");
         } catch (Exception e) {
-            sendMessage.setText("Ваш файл не может быть добавлен");
+            sendMessage.setText("❌Ваш файл не может быть добавлен");
         }
 
     }
