@@ -8,18 +8,18 @@
       <jdbc-url>jdbc:postgresql://localhost:5432/Personal_Assistant</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="d6mugikdb2so01@ec2-54-74-14-109.eu-west-1.compute.amazonaws.com" uuid="59294ca2-a931-47ba-8427-13ec5636336e">
-      <driver-ref>postgresql</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://ec2-54-74-14-109.eu-west-1.compute.amazonaws.com:5432/d6mugikdb2so01</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
     <data-source source="LOCAL" name="testDiplom@localhost" uuid="4da75b73-56b1-4e62-a4e1-597ed36cfa3f">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql://localhost:5432/testDiplom</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="ddi4roethmsoaa@ec2-54-229-68-88.eu-west-1.compute.amazonaws.com" uuid="4ce89126-2f9c-4d3b-8126-d8b89c34f87e">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://ec2-54-229-68-88.eu-west-1.compute.amazonaws.com:5432/ddi4roethmsoaa</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

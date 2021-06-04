@@ -1,3 +1,4 @@
+import service.telegram.TelegramMethods;
 import telegram.BotTelegram;
 import org.apache.log4j.PropertyConfigurator;
 import org.telegram.telegrambots.ApiContextInitializer;
@@ -13,11 +14,10 @@ public class main {
         startBot();
     }
 
-    private static void startBot() throws Exception {
-//        PropertyConfigurator.configure(System.getProperty("user.dir") + "/src/main/resources/log4j.properties");
+    private static void startBot() {
         PropertyConfigurator.configure(main.class.getClassLoader().getResource("log4j.properties"));
         ApiContextInitializer.init();
-        botTelegram = new BotTelegram("PA_Komar_bot", "1610562314:AAGmMW_XP74L2Ow8wJM_wIREVC8w3WcrqiQ");
+        botTelegram = new BotTelegram("PA_Komar_bot", TelegramMethods.decrypt("8hYCCliaQH5MUBUSvdpGJr+/fMh85pAf9nfeYWYzsd/XYwZYz+WB9BR/RYx4URdH"));
         TelegramBotsApi botsApi = new TelegramBotsApi();
         try {
             session = botsApi.registerBot(botTelegram);

@@ -22,7 +22,7 @@ public class BotTelegram extends TelegramLongPollingBot {
         Message message = update.getMessage();
         if (message != null && (message.hasText() || message.hasLocation() || message.hasDocument() || message.hasPhoto())) {
             try {
-                TelegramMethods.sendMsg(message, this);
+                TelegramMethods.getMsg(message, this);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }

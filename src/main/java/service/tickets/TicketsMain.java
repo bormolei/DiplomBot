@@ -32,9 +32,7 @@ public class TicketsMain extends TelegramKeyboard {
     static Response response = RestAssured.given()
             .contentType(ContentType.JSON)
             .get(getAllStationsURI);
-    static JsonArray s = jsonParser.parse(new InputStreamReader(response.asInputStream()))
-            .getAsJsonObject().get("countries")
-            .getAsJsonArray();
+    static String s = response.asString();
     static List listCities = CitiesService.getAllCities();
 
     public static String getTicketInfo(String findCity) {
@@ -182,6 +180,6 @@ public class TicketsMain extends TelegramKeyboard {
     }
 
     private static boolean checkCity(String cityName) {
-        return s.toString().contains("\"title\":\"" + cityName + "\"");
+        return s.contains("\"title\": \"" + cityName + "\"");
     }
 }

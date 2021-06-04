@@ -38,12 +38,16 @@ public class TelegramService {
     protected static User user = new User();
     protected static TicketsModel ticketsModel = new TicketsModel();
     protected static FileStorageModel fileStorageModel = new FileStorageModel();
-    protected static WeatherParser weatherParser = new WeatherBot();
+    protected static WeatherBot weatherParser = new WeatherBot();
     protected static SendMessage sendMessage;
     protected static EditMessageText editMessageText;
     protected static SendDocument document;
     protected static ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
     static final String baseUri = "https://api.telegram.org";
+
+    protected static String secretKey = "U2WoExDA1R";
+    protected static String salt = "k3G6b8w0V8";
+
 
 
     public static String checkMode(Long chatId) {
