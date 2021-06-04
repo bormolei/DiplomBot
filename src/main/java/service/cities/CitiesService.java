@@ -13,6 +13,7 @@ import service.hibernateService.CitiesHibernateService;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class CitiesService {
     static CityModel cityModel = new CityModel();
@@ -44,7 +45,7 @@ public class CitiesService {
                     } catch (NullPointerException e) {
                         cityCode = null;
                     }
-                    cityModel.setCityName(cityName);
+                    cityModel.setCityName(cityName.toLowerCase(Locale.ROOT));
                     cityModel.setCountry(countryName);
                     cityModel.setCityCode(cityCode);
                     if (cityModel.getCityCode()!=null) {

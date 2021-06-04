@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import service.cities.CitiesService;
+import service.hibernateService.CitiesHibernateService;
 import service.telegram.TelegramKeyboard;
 
 import java.io.InputStreamReader;
@@ -22,6 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class TicketsMain extends TelegramKeyboard {
     static String getAllStationsURI = "https://api.rasp.yandex.net/v3.0/stations_list/?apikey=1324d008-778c-4fca-a057-2c7ce97c7b92&lang=ru_RU&format=json";
@@ -29,16 +31,13 @@ public class TicketsMain extends TelegramKeyboard {
     static List<String> l = new ArrayList<>();
     static DateTimeFormatter formatter;
     static List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-    static Response response = RestAssured.given()
-            .contentType(ContentType.JSON)
-            .get(getAllStationsURI);
-    static String s = response.asString();
+    static Response response;
     static List listCities = CitiesService.getAllCities();
 
     public static String getTicketInfo(String findCity) {
         for (Object listCity : listCities) {
             CityModel city = (CityModel) listCity;
-            if (city.getCityName().equals(findCity)) {
+            if (city.getCityName().equals(findCity.toLowerCase(Locale.ROOT))) {
                 return city.getCityCode();
             }
         }
@@ -76,43 +75,55 @@ public class TicketsMain extends TelegramKeyboard {
         JsonObject jo = jsonParser.parse(new InputStreamReader(response.asInputStream()))
                 .getAsJsonObject();
         formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
-        int nextPage = recordNumber + 5;
-        int previousPage;
-        if (recordNumber > 4) {
-            previousPage = recordNumber - 5;
-        } else {
-            previousPage = 0;
-        }
-        JsonArray segments = jo.get("segments").getAsJsonArray();
-        if (segments.size() < 6) {
-            ticketsKeyboard(from, to, date, segments, recordNumber, segments.size());
-        } else {
-//            changeButtonsRow.add(new InlineKeyboardButton().setText("<")
-//                    .setCallbackData("Ticket'changeTicket'previous'"+previousPage));
-//            changeButtonsRow.add(new InlineKeyboardButton().setText(">")
-//                    .setCallbackData("Ticket'changeTicket'previous'"+nextPage));
-            ticketsKeyboard(from, to, date, segments, recordNumber, recordNumber + 5);
-        }
+        if (jo.size() != 1) {
+            JsonArray segments = jo.get("segments").getAsJsonArray();
+            int nextPage;
+            if (recordNumber + 5 > segments.size()) {
+                nextPage = segments.size();
+            } else {
+                nextPage = recordNumber + 5;
+            }
+            int previousPage;
+            if (recordNumber > 4) {
+                previousPage = recordNumber - 5;
+            } else {
+                previousPage = 0;
+            }
+            if (segments.size() < 6) {
+                ticketsKeyboard(from, to, date, segments, recordNumber, segments.size());
+            } else {
+                changeButtonsRow.add(new InlineKeyboardButton().setText("<")
+                        .setCallbackData("Ticket'changeTicket'previous'" + from + "@" + to + "@" + date + "@" + previousPage));
+                changeButtonsRow.add(new InlineKeyboardButton().setText(">")
+                        .setCallbackData("Ticket'changeTicket'next'" + from + "@" + to + "@" + date + "@" + nextPage));
+                if (recordNumber + 5 < segments.size()) {
+                    ticketsKeyboard(from, to, date, segments, recordNumber, 6);
+                } else {
+                    ticketsKeyboard(from, to, date, segments, recordNumber, 6);
+                }
+            }
 
-        if (keyboardButtonsRow1.size() != 0) {
-            rowList.add(keyboardButtonsRow1);
+            if (keyboardButtonsRow1.size() != 0) {
+                rowList.add(keyboardButtonsRow1);
+            }
+            if (keyboardButtonsRow2.size() != 0) {
+                rowList.add(keyboardButtonsRow2);
+            }
+            if (keyboardButtonsRow3.size() != 0) {
+                rowList.add(keyboardButtonsRow3);
+            }
+            if (keyboardButtonsRow4.size() != 0) {
+                rowList.add(keyboardButtonsRow4);
+            }
+            if (keyboardButtonsRow5.size() != 0) {
+                rowList.add(keyboardButtonsRow5);
+            }
+            if (changeButtonsRow.size() != 0) {
+                rowList.add(changeButtonsRow);
+            }
+            inlineKeyboardMarkup.setKeyboard(rowList);
+            return inlineKeyboardMarkup;
         }
-        if (keyboardButtonsRow2.size() != 0) {
-            rowList.add(keyboardButtonsRow2);
-        }
-        if (keyboardButtonsRow3.size() != 0) {
-            rowList.add(keyboardButtonsRow3);
-        }
-        if (keyboardButtonsRow4.size() != 0) {
-            rowList.add(keyboardButtonsRow4);
-        }
-        if (keyboardButtonsRow5.size() != 0) {
-            rowList.add(keyboardButtonsRow5);
-        }
-        if (changeButtonsRow.size() != 0) {
-            rowList.add(changeButtonsRow);
-        }
-        inlineKeyboardMarkup.setKeyboard(rowList);
         return inlineKeyboardMarkup;
     }
 
@@ -180,6 +191,7 @@ public class TicketsMain extends TelegramKeyboard {
     }
 
     private static boolean checkCity(String cityName) {
-        return s.contains("\"title\": \"" + cityName + "\"");
+        return CitiesHibernateService.haveCity(cityName);
     }
+
 }

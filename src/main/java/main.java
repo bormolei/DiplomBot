@@ -1,3 +1,5 @@
+import service.cities.CitiesService;
+import service.hibernateService.CitiesHibernateService;
 import service.telegram.TelegramMethods;
 import telegram.BotTelegram;
 import org.apache.log4j.PropertyConfigurator;
@@ -17,6 +19,9 @@ public class main {
     private static void startBot() {
         PropertyConfigurator.configure(main.class.getClassLoader().getResource("log4j.properties"));
         ApiContextInitializer.init();
+        if(CitiesHibernateService.haventCities()){
+            CitiesService.setCities();
+        }
         botTelegram = new BotTelegram("PA_Komar_bot", TelegramMethods.decrypt("8hYCCliaQH5MUBUSvdpGJr+/fMh85pAf9nfeYWYzsd/XYwZYz+WB9BR/RYx4URdH"));
         TelegramBotsApi botsApi = new TelegramBotsApi();
         try {

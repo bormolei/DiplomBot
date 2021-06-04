@@ -11,7 +11,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -20,18 +19,20 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import service.calendar.BotCalendar;
 import service.calendar.BotCalendarDateConverter;
 import service.hibernateService.BotCalendarHibernateService;
+import service.hibernateService.CitiesHibernateService;
 import service.hibernateService.TicketsHibernateService;
 import service.hibernateService.UserHibernateService;
 import service.tickets.TicketsMain;
 import service.tickets.TicketsMethods;
 import service.weather.WeatherBot;
-import service.weather.WeatherParser;
 import utils.Commands;
 
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class TelegramService {
     protected static BotCalendarModel bcm = new BotCalendarModel();
@@ -47,7 +48,6 @@ public class TelegramService {
 
     protected static String secretKey = "U2WoExDA1R";
     protected static String salt = "k3G6b8w0V8";
-
 
 
     public static String checkMode(Long chatId) {
@@ -229,6 +229,13 @@ public class TelegramService {
         } else if (callbackQuery.getData().split("'")[1].equals("cancel")) {
             ticketsModel.clearFieldsToDB();
             editMessageText.setText(TicketsMethods.ticketInfo(ticketsModel));
+        } else if (callbackQuery.getData().split("'")[1].equals("changeTicket")) {
+            List<String> l = Arrays.asList(callbackQuery.getData().split("'")[3].split("@"));
+            InlineKeyboardMarkup inlineKeyboardMarkup = TicketsMain.getRzdURI(l.get(0), l.get(1), l.get(2), Integer.parseInt(l.get(3)));
+            setTicket(l.get(0), l.get(1), LocalDate.parse(l.get(2)));
+            editMessageText.setText(ticketsModel.getInfoAboutTicket())
+                    .setReplyMarkup(inlineKeyboardMarkup);
+            ticketsModel.clearFieldsToDB();
         }
         TicketsHibernateService.updateTicketInfo(ticketsModel);
     }
@@ -249,5 +256,14 @@ public class TelegramService {
         return new JSONObject(response)
                 .getJSONObject("result")
                 .getString("file_path");
+    }
+
+
+    private static void setTicket(String from, String to, LocalDate date) {
+        String cityName = CitiesHibernateService.getCity(from).getCityName();
+        ticketsModel.setDepartureCity(cityName.substring(0, 1).toUpperCase(Locale.ROOT) + cityName.substring(1).toLowerCase());
+        cityName = CitiesHibernateService.getCity(to).getCityName();
+        ticketsModel.setArrivalCity(cityName.substring(0, 1).toUpperCase(Locale.ROOT) + cityName.substring(1).toLowerCase());
+        ticketsModel.setDepartureDate(date);
     }
 }

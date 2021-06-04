@@ -31,7 +31,7 @@ public class TelegramMsgMethods extends TelegramMethods {
     public static void ticketHandler(Message message) {
         if (!TicketsMethods.hasFullInfo(ticketsModel)) {
             String city = message.getText().substring(0, 1).toUpperCase(Locale.ROOT) + message.getText().substring(1).toLowerCase();
-            String accuracy = TicketsMain.checkData(ticketsModel, city);
+            String accuracy = TicketsMain.checkData(ticketsModel, city.toLowerCase(Locale.ROOT));
             if (accuracy.equals("OK")) {
                 TicketsMethods.addField(ticketsModel, city);
                 sendMessage.setText(TicketsMethods.ticketInfo(ticketsModel));

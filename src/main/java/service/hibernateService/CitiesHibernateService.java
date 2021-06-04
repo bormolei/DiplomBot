@@ -14,4 +14,16 @@ public class CitiesHibernateService {
     public static List getAllCities(CityModel city){
         return HibernateController.getAllRows(city);
     }
+
+    public static boolean haventCities(){
+        return HibernateController.getAllRows(new CityModel()).isEmpty();
+    }
+
+    public static boolean haveCity(String cityName){
+        return !HibernateController.getRowsByField(new CityModel(), "cityName", cityName).isEmpty();
+    }
+
+    public static CityModel getCity(String cityCode){
+        return (CityModel) HibernateController.getRowsByField(new CityModel(),"cityCode", cityCode).get(0);
+    }
 }

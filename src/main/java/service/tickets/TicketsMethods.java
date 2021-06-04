@@ -13,7 +13,7 @@ public class TicketsMethods {
         } else if (ticket.getArrivalCity() == null) {
             return ticket.getInfoAboutTicket() + "\n\n" + "Введите город назначения";
         } else if (ticket.getDepartureDate() == null) {
-            return ticket.getInfoAboutTicket() + "\n\n" + "Введите дату отправления";
+            return ticket.getInfoAboutTicket() + "\n\n" + "Введите дату отправления.\nПример \"01-01-2000\"";
         }
         return ticket.getInfoAboutTicket();
     }

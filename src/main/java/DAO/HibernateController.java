@@ -62,6 +62,16 @@ public class HibernateController {
         }
     }
 
+    public static List<? extends MainModel> getRowsByField(MainModel mainModel, String fieldName, String condition) {
+        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<? extends MainModel> criteria = builder.createQuery(mainModel.getClass());
+            Root root = criteria.from(mainModel.getClass());
+            criteria.select(root).where(builder.equal(root.get(fieldName), condition));
+            return session.createQuery(criteria).getResultList();
+        }
+    }
+
     public static List<? extends MainModel> getUserRows(MainModel mainModel, String fieldName, Long condition) {
         try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
             CriteriaBuilder builder = session.getCriteriaBuilder();
