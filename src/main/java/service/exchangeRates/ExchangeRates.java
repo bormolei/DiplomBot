@@ -58,7 +58,8 @@ public class ExchangeRates extends TelegramKeyboard {
             String key = currries.getKey();
             Double value = currries.getValue();
             if (key.contains(currency)) {
-                return "Рубли: " + amount + " - " + key.split("-")[0] + ": " + String.format("%.2f", amount / value);
+                return "Курс валюты: 1 " + key.split("-")[0] + " равен " + String.format("%.2f", value) + " Рублей"
+                        + "\n\nРубли: " + amount + "\n" + key.split("-")[0] + ": " + String.format("%.2f", amount / value);
             }
         }
         return null;

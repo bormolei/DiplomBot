@@ -8,6 +8,9 @@ import service.hibernateService.CitiesHibernateService;
 import service.telegram.TelegramMethods;
 import telegram.BotTelegram;
 
+import java.text.SimpleDateFormat;
+import java.time.Month;
+import java.util.Calendar;
 import java.util.Locale;
 
 public class tests {
@@ -38,6 +41,9 @@ public class tests {
 
     //2021-03-27 11:56:13.445000
     private static void test() throws Exception {
-//        System.out.println(CitiesHibernateService.getCity("c213").getCityName());
+        Calendar calendar = Calendar.getInstance();
+        String[] monthNames = {"Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" };
+        String month = monthNames[1];
+        System.out.println(month);
     }
 }

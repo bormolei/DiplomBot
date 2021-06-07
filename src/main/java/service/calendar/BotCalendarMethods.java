@@ -15,6 +15,8 @@ import java.time.Year;
 import java.util.List;
 
 public class BotCalendarMethods extends TelegramKeyboard {
+    static String[] monthNames = {"Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" };
+
 
     /**
      * Создание клавиатуры для года
@@ -27,19 +29,19 @@ public class BotCalendarMethods extends TelegramKeyboard {
                 .setCallbackData("Calendar'ChooseYearButton"));
         for (int i = 1; i <= 12; i++) {
             if (i <= 3) {
-                keyboardButtonsRow1.add(new InlineKeyboardButton().setText(Month.of(i).toString())
+                keyboardButtonsRow1.add(new InlineKeyboardButton().setText(monthNames[i-1])
                         .setCallbackData("Calendar'Month''" + (Month.of(i).getValue()) + "'" + year));
             }
             if (i > 3 && i <= 6) {
-                keyboardButtonsRow2.add(new InlineKeyboardButton().setText(Month.of(i).toString())
+                keyboardButtonsRow2.add(new InlineKeyboardButton().setText(monthNames[i-1])
                         .setCallbackData("Calendar'Month''" + (Month.of(i).getValue()) + "'" + year));
             }
             if (i > 6 && i <= 9) {
-                keyboardButtonsRow3.add(new InlineKeyboardButton().setText(Month.of(i).toString())
+                keyboardButtonsRow3.add(new InlineKeyboardButton().setText(monthNames[i-1])
                         .setCallbackData("Calendar'Month''" + (Month.of(i).getValue()) + "'" + year));
             }
             if (i > 9) {
-                keyboardButtonsRow4.add(new InlineKeyboardButton().setText(Month.of(i).toString())
+                keyboardButtonsRow4.add(new InlineKeyboardButton().setText(monthNames[i-1])
                         .setCallbackData("Calendar'Month''" + (Month.of(i).getValue()) + "'" + year));
             }
         }
@@ -98,7 +100,7 @@ public class BotCalendarMethods extends TelegramKeyboard {
             changeButtonsRow.add(new InlineKeyboardButton().setText(">")
                     .setCallbackData("Calendar'Month''" + (month + 1) + "'" + localYear));
         }
-        keyboardButtonsMonthYear.add(new InlineKeyboardButton().setText(Month.of(month).toString() + " " + year)
+        keyboardButtonsMonthYear.add(new InlineKeyboardButton().setText(monthNames[month-1] + " " + year)
                 .setCallbackData("Calendar'ChooseMonthButton'''" + year));
         switch (month) {
             case 1:

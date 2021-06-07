@@ -116,7 +116,7 @@ public class TelegramMethods extends TelegramService {
                 break;
             case "Календарь":
                 changeModeForUser(Commands.CALENDAR.toString());
-                sendMessage.setText("Выберите число")
+                sendMessage.setText("Выберите число или смените месяц")
                         .setReplyMarkup(BotCalendar.createMonth(currentMonth, LocalDate.now().getYear()));
                 break;
             case "Транспортные билеты":

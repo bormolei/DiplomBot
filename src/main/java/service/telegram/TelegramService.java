@@ -195,8 +195,12 @@ public class TelegramService {
             editMessageText.setText("Укажите время для вашей заметки и текст заметки" +
                     "\nобразец \"11:12-Прогулка\"");
         } else {
-            editMessageText.setText("Выберите месяц")
-                    .setReplyMarkup(chooseAnswer(callbackQuery));
+            if (callbackQuery.getData().split("'")[1].equals("Month")) {
+                editMessageText.setText("Выберите число или смените месяц");
+            } else {
+                editMessageText.setText("Выберите месяц");
+            }
+            editMessageText.setReplyMarkup(chooseAnswer(callbackQuery));
         }
     }
 
