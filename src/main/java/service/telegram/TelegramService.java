@@ -18,6 +18,8 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import service.calendar.BotCalendar;
 import service.calendar.BotCalendarDateConverter;
+import service.fileStorage.FileKeyboard;
+import service.fileStorage.FileStorageMethods;
 import service.hibernateService.BotCalendarHibernateService;
 import service.hibernateService.CitiesHibernateService;
 import service.hibernateService.TicketsHibernateService;
@@ -42,7 +44,7 @@ public class TelegramService {
     protected static WeatherBot weatherParser = new WeatherBot();
     protected static SendMessage sendMessage;
     protected static EditMessageText editMessageText;
-    protected static SendDocument document;
+    protected static SendDocument sendDocument;
     protected static ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
     static final String baseUri = "https://api.telegram.org";
 
@@ -67,8 +69,8 @@ public class TelegramService {
     }
 
     protected static void documentOptions(Message message) {
-        document = new SendDocument();
-        document.setChatId(message.getChatId());
+        sendDocument = new SendDocument();
+        sendDocument.setChatId(message.getChatId());
     }
 
     protected static void changeModeForUser(String mode) {
@@ -242,6 +244,38 @@ public class TelegramService {
             ticketsModel.clearFieldsToDB();
         }
         TicketsHibernateService.updateTicketInfo(ticketsModel);
+    }
+
+    protected static void fileStorageCallBack(CallbackQuery callbackQuery) {
+        String choice = callbackQuery.getData().split("'")[1];
+        switch (choice) {
+            case "fileMode":
+                List<FileStorageModel> fileNameList = FileStorageMethods.getFilesFromDB();
+                String fileMode = callbackQuery.getData().split("'")[2];
+                switch (fileMode) {
+                    case "download":
+                        editMessageText.setText("Список ваших файлов:").setReplyMarkup(FileKeyboard.createFileKeyboard(fileNameList, fileMode + "FromDB"));
+                        break;
+                    case "delete":
+                        editMessageText.setText("\uD83D\uDDD1Выберите файл который хотите удалить:").setReplyMarkup(FileKeyboard.createFileKeyboard(fileNameList, fileMode + "FromDB"));
+                        break;
+                }
+                break;
+            case "downloadFromDB":
+                FileStorageMethods.downloadFile(Integer.parseInt(callbackQuery.getData().split("'")[2]));
+                break;
+            case "deleteFromDB":
+                boolean checkToDelete = FileStorageMethods.deleteFile(Integer.parseInt(callbackQuery.getData().split("'")[2]));
+                fileNameList = FileStorageMethods.getFilesFromDB();
+                if(checkToDelete){
+                    editMessageText.setText("Ваш файл удален").setReplyMarkup(FileKeyboard.createFileKeyboard(fileNameList, choice));
+                }
+                break;
+            case "back":
+                editMessageText.setText("Выберите что вы хотите сделать с вашими файлами").setReplyMarkup((InlineKeyboardMarkup) FileKeyboard.chooseFileMode());
+                break;
+        }
+
     }
 
     protected static void backToMainMenu(CallbackQuery callbackQuery) {

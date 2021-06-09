@@ -19,7 +19,17 @@ public class FileStorageHibernateService {
         return (List<FileStorageModel>) HibernateController.getRowsByField(file, "chatId", user.getId());
     }
 
-    public static FileStorageModel downloadFile(int id) {
+    public static FileStorageModel getFile(int id) {
         return (FileStorageModel) HibernateController.getRowsByField(file, "id", id).get(0);
+    }
+
+    public static boolean deleteFile(FileStorageModel file) {
+        try{
+            HibernateController.doHibernateAction(file,Actions.DELETE);
+            return true;
+        } catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
 }

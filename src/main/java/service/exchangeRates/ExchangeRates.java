@@ -35,7 +35,11 @@ public class ExchangeRates extends TelegramKeyboard {
                 cursTmp.put(currency, value);
             }
         }
-        return cursTmp;
+        if(cursTmp.size() == 3){
+            return cursTmp;
+        } else {
+            return null;
+        }
     }
 
     public static ReplyKeyboard setCurries(Double amount) {

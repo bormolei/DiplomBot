@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Locale;
 
 public class TicketsMain extends TelegramKeyboard {
-    static String getAllStationsURI = "https://api.rasp.yandex.net/v3.0/stations_list/?apikey=1324d008-778c-4fca-a057-2c7ce97c7b92&lang=ru_RU&format=json";
     static JsonParser jsonParser = new JsonParser();
     static List<String> l = new ArrayList<>();
     static DateTimeFormatter formatter;

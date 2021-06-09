@@ -112,7 +112,7 @@ public class TelegramMethods extends TelegramService {
             case "Погода":
                 changeModeForUser(Commands.WEATHER.toString());
                 setGeoLocationButton(sendMessage);
-                sendMessage.setText("Введите название города.\nНапример: \"Москва\" или \"Moscow\"");
+                sendMessage.setText("Введите название города.\nНапример: \uD83C\uDDF7\uD83C\uDDFA\"Москва\" или \uD83C\uDDFA\uD83C\uDDF8\"Moscow\"");
                 break;
             case "Календарь":
                 changeModeForUser(Commands.CALENDAR.toString());
@@ -129,8 +129,7 @@ public class TelegramMethods extends TelegramService {
                 }
                 break;
             case "Мои файлы":
-                List<FileStorageModel> fileNameList = FileStorageMethods.getFileFromDB(message);
-                sendMessage.setText("Список ваших файлов:").setReplyMarkup(FileKeyboard.createFileKeyboard(fileNameList));
+                sendMessage.setText("Выберите что вы хотите сделать с вашими файлами").setReplyMarkup(FileKeyboard.chooseFileMode());
                 break;
             case "Курс валют":
                 changeModeForUser(Commands.EXCHANGERATES.toString());
@@ -161,8 +160,7 @@ public class TelegramMethods extends TelegramService {
                 ticketsCallBack(callbackQuery);
                 break;
             case "File":
-                FileStorageMethods.downloadFile(Integer.parseInt(callbackQuery.getData().split("'")[1]));
-                botTelegram.execute(document);
+                fileStorageCallBack(callbackQuery);
                 break;
             case "Rates":
                 String result = ExchangeRates.convert(callbackQuery);
@@ -186,6 +184,9 @@ public class TelegramMethods extends TelegramService {
             }
             if (!callbackQuery.getData().split("'")[0].equals(" ") && editMessageText.getText() != null) {
                 botTelegram.execute(editMessageText);
+            }
+            if (sendDocument.getDocument() != null) {
+                botTelegram.execute(sendDocument);
             }
         } catch (TelegramApiRequestException e) {
             e.printStackTrace();
