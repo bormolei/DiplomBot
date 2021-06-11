@@ -17,13 +17,13 @@ public class FileStorageModel implements MainModel {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User chatId;
 
-    @Column(name = "file")
+    @Column(name = "file", nullable = false)
     private byte[] file;
 
-    @Column(name = "file_name")
+    @Column(name = "file_name", nullable = false)
     private String fileName;
 
-    @Column(name = "file_extension")
+    @Column(name = "file_extension", nullable = false)
     private String fileExtension;
 
 

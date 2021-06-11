@@ -34,7 +34,9 @@ public class tests {
         PropertyConfigurator.configure(tests.class.getClassLoader().getResource("log4j.properties"));
         ApiContextInitializer.init();
         try {
-            TicketsMain.getTicketInfo("Москва");
+            if (CitiesHibernateService.haventCities()) {
+                CitiesService.setCities();
+            }
             System.out.println("Сервис города и транспортные билеты работают");
         } catch (Exception e) {
             e.printStackTrace();
