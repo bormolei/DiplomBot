@@ -23,6 +23,10 @@ public class FileStorageHibernateService {
         return (FileStorageModel) HibernateController.getRowsByField(file, "id", id).get(0);
     }
 
+    public static  List<FileStorageModel> getFile(String fileName, Integer chatId) {
+        return (List<FileStorageModel>) HibernateController.getRowsByFields(file, "fileName", fileName,chatId);
+    }
+
     public static boolean deleteFile(FileStorageModel file) {
         try{
             HibernateController.doHibernateAction(file,Actions.DELETE);

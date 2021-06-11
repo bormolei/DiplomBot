@@ -9,8 +9,16 @@ import java.util.List;
 public class WeatherMethods extends TelegramKeyboard {
     protected static ReplyKeyboard createHoursKeyBoard(List<List<InlineKeyboardButton>> rowList, int day) {
         for (int i = 1; i <= 5; i += 2) {
+            String dayStr = "";
+            if (i == 1) {
+                dayStr = " день";
+            } else if (i == 3) {
+                dayStr = " дня";
+            } else if (i == 5) {
+                dayStr = " дней";
+            }
             if (i != day) {
-                keyboardButtonsRow1.add(new InlineKeyboardButton().setText(String.valueOf(i))
+                keyboardButtonsRow1.add(new InlineKeyboardButton().setText("Погода на " + i + dayStr)
                         .setCallbackData(String.format("day'%s", i)));
             }
         }

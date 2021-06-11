@@ -23,6 +23,9 @@ public class FileStorageModel implements MainModel {
     @Column(name = "file_name")
     private String fileName;
 
+    @Column(name = "file_extension")
+    private String fileExtension;
+
 
     @Override
     public void clearFields() {
@@ -30,6 +33,7 @@ public class FileStorageModel implements MainModel {
         chatId = null;
         file = null;
         fileName = null;
+        fileExtension = null;
     }
 
     public Integer getId() {
@@ -58,5 +62,13 @@ public class FileStorageModel implements MainModel {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public String getFileExtension() {
+        return fileExtension;
+    }
+
+    public void setFileExtension(String file_extension) {
+        this.fileExtension = file_extension;
     }
 }

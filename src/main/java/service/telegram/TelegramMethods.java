@@ -86,6 +86,10 @@ public class TelegramMethods extends TelegramService {
                     case "EXCHANGERATES":
                         TelegramMsgMethods.exchangeRates(message);
                         break;
+                    case "MYFILES-DELETE":
+                    case "MYFILES-DOWNLOAD":
+                        TelegramMsgMethods.fileHandler(message);
+                        break;
                     case "GREETINGS":
                         changeModeForUser("MAIN");
                         String str = "Здравствуйте, " + user.getUserName() + ", я ваш Личный помощник. " +

@@ -7,9 +7,7 @@ import org.hibernate.Transaction;
 import utils.Actions;
 import utils.HibernateSessionFactoryUtil;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.util.List;
 
 public class HibernateController {
@@ -68,6 +66,25 @@ public class HibernateController {
             CriteriaQuery<? extends MainModel> criteria = builder.createQuery(mainModel.getClass());
             Root root = criteria.from(mainModel.getClass());
             criteria.select(root).where(builder.equal(root.get(fieldName), condition));
+            return session.createQuery(criteria).getResultList();
+        }
+    }
+
+    public static List<? extends MainModel> getRowsByFields(MainModel mainModel, String fieldName, String condition, Integer userChatId) {
+        try (Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession()) {
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<? extends MainModel> criteria = builder.createQuery(mainModel.getClass());
+            Root root = criteria.from(mainModel.getClass());
+
+            Path<String> ChatId = root.get("chatId");
+            Path<String> criteriaFieldName = root.get(fieldName);
+
+            Predicate userNamePredicate = builder.equal(ChatId, userChatId);
+            Predicate firstNamePredicate = builder.like(criteriaFieldName, condition);
+
+            Predicate middleNameAndEnablePredicate = builder.and(userNamePredicate, firstNamePredicate);
+
+            criteria.select(root).where(middleNameAndEnablePredicate);
             return session.createQuery(criteria).getResultList();
         }
     }

@@ -1,10 +1,13 @@
 package service.telegram;
 
 import Exceptions.Calendar.MonthException;
+import model.FileStorageModel;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import service.calendar.BotCalendarDateConverter;
 import service.calendar.BotCalendarMethods;
 import service.exchangeRates.ExchangeRates;
+import service.fileStorage.FileKeyboard;
+import service.fileStorage.FileStorageMethods;
 import service.hibernateService.BotCalendarHibernateService;
 import service.hibernateService.TicketsHibernateService;
 import service.hibernateService.UserHibernateService;
@@ -13,6 +16,7 @@ import service.tickets.TicketsMethods;
 import service.weather.WeatherBot;
 
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -47,10 +51,10 @@ public class TelegramMsgMethods extends TelegramMethods {
     public static void exchangeRates(Message message) {
         try {
 
-            Double amount = Double.parseDouble(message.getText().replace(",","."));
+            Double amount = Double.parseDouble(message.getText().replace(",", "."));
             sendMessage.setText("Укажите к какой валюте произвести расчет")
                     .setReplyMarkup(ExchangeRates.setCurries(amount));
-        } catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             sendMessage.setText("Не корректное значение");
         }
     }
@@ -88,6 +92,24 @@ public class TelegramMsgMethods extends TelegramMethods {
         } else {
             sendMessage.setText(weatherAnswer)
                     .setReplyMarkup(WeatherBot.createHours(1));
+        }
+    }
+
+    public static void fileHandler(Message message) throws MonthException {
+        String fileName = message.getText();
+        String fileMode = user.getMode().split("-")[1];
+        List<FileStorageModel> files = FileStorageMethods.getFilesFromDB();
+        List<FileStorageModel> searchedFiles = new ArrayList();
+        for (FileStorageModel file : files) {
+            if ((file).getFileName().contains(fileName)) {
+                searchedFiles.add(file);
+            }
+        }
+        try{
+            sendMessage.setText("Список найденных файлов").setReplyMarkup(FileKeyboard.createFileKeyboard(searchedFiles, fileMode+"FromDB"));
+        } catch (Exception e){
+            sendMessage.setText("Файлов с таким название не найдено" +
+                    "\nВыберите режим или введите корректное название").setReplyMarkup(FileKeyboard.chooseFileMode());
         }
     }
 

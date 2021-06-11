@@ -254,10 +254,14 @@ public class TelegramService {
                 String fileMode = callbackQuery.getData().split("'")[2];
                 switch (fileMode) {
                     case "download":
-                        editMessageText.setText("Список ваших файлов:").setReplyMarkup(FileKeyboard.createFileKeyboard(fileNameList, fileMode + "FromDB"));
+                        editMessageText.setText("Выберите файл для скачивания или напишите его название для поиска" +
+                                "\nСписок ваших файлов:").setReplyMarkup(FileKeyboard.createFileKeyboard(fileNameList, fileMode + "FromDB"));
+                        changeModeForUser(Commands.MYFILES + "-download");
                         break;
                     case "delete":
-                        editMessageText.setText("\uD83D\uDDD1Выберите файл который хотите удалить:").setReplyMarkup(FileKeyboard.createFileKeyboard(fileNameList, fileMode + "FromDB"));
+                        editMessageText.setText("\uD83D\uDDD1Выберите файл который хотите удалить или напишите его название для поиска" +
+                                "\nСписок ваших файлов:").setReplyMarkup(FileKeyboard.createFileKeyboard(fileNameList, fileMode + "FromDB"));
+                        changeModeForUser(Commands.MYFILES + "-delete");
                         break;
                 }
                 break;

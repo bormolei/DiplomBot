@@ -22,10 +22,10 @@ public class FileKeyboard extends TelegramKeyboard {
                         .setCallbackData("File'" + mode + "'" + fileStorageModel.getId()));
             } else if (i < 4) {
                 keyboardButtonsRow2.add(new InlineKeyboardButton().setText(fileStorageModel.getFileName())
-                        .setCallbackData("File'" + fileStorageModel.getId()));
+                        .setCallbackData("File'" + mode + "'" + fileStorageModel.getId()));
             } else if (i < 6) {
                 keyboardButtonsRow3.add(new InlineKeyboardButton().setText(fileStorageModel.getFileName())
-                        .setCallbackData("File'" + fileStorageModel.getId()));
+                        .setCallbackData("File'" + mode + "'" + fileStorageModel.getId()));
             }
         }
         if (!keyboardButtonsRow1.isEmpty()) {

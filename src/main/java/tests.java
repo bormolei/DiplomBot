@@ -1,3 +1,4 @@
+import model.FileStorageModel;
 import org.apache.log4j.PropertyConfigurator;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
@@ -7,6 +8,7 @@ import service.calendar.BotCalendarMethods;
 import service.cities.CitiesService;
 import service.exchangeRates.ExchangeRates;
 import service.hibernateService.CitiesHibernateService;
+import service.hibernateService.FileStorageHibernateService;
 import service.telegram.TelegramMethods;
 import service.tickets.TicketsMain;
 import service.weather.WeatherBot;
@@ -15,6 +17,7 @@ import telegram.BotTelegram;
 import java.text.SimpleDateFormat;
 import java.time.Month;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class tests {
@@ -30,20 +33,20 @@ public class tests {
     private static void startBot() throws Exception {
         PropertyConfigurator.configure(tests.class.getClassLoader().getResource("log4j.properties"));
         ApiContextInitializer.init();
-        try{
+        try {
             TicketsMain.getTicketInfo("Москва");
             System.out.println("Сервис города и транспортные билеты работают");
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Ошибка в работе сервисов города или транспортные билеты");
         }
         System.out.println("Сервис календарь работает");
-        if(ExchangeRates.setCurrencies()!=null){
+        if (ExchangeRates.setCurrencies() != null) {
             System.out.println("Сервис курса валют работает");
         }
         System.out.println("Сервис \"Мои файлы\" работает");
         WeatherBot weatherBot = new WeatherBot();
-        if(!weatherBot.getReadyForecast("Moscow",1).equals("Сервис сейчас не работает")){
+        if (!weatherBot.getReadyForecast("Moscow", 1).equals("Сервис сейчас не работает")) {
             System.out.println("Сервис прогноза погоды работает");
         } else {
             System.out.println("В сервисе прогноза погоды ошибка");
@@ -60,9 +63,8 @@ public class tests {
 
     //2021-03-27 11:56:13.445000
     private static void test() throws Exception {
-        Calendar calendar = Calendar.getInstance();
-        String[] monthNames = {"Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" };
-        String month = monthNames[1];
-        System.out.println(month);
+        Integer chatId = 3;
+        List f = FileStorageHibernateService.getFile("Метод решающих матриц",chatId);
+        System.out.println();
     }
 }
